@@ -64,6 +64,91 @@
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Obi\Resources\Compute\PathFrame.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\BoxShapeQuery.compute" />
+    <None Include="Assets\Obi\Resources\Compute\DensityConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\SoftbodyRendering.compute" />
+    <None Include="Assets\Obi\Resources\Compute\Matrix.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\NormalCompression.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\Scan.compute" />
+    <None Include="Assets\Obi\Resources\Compute\PathSmoothing.compute" />
+    <None Include="Assets\Obi\Resources\Compute\Optimization.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\EdgeMeshShape.compute" />
+    <None Include="Assets\Obi\Resources\Compute\Bounds.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\FluidFoamCollisions.compute" />
+    <None Include="Assets\Obi\Resources\Compute\MathUtils.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\BendConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\PinholeConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\InstancedParticleRendering.compute" />
+    <None Include="Assets\Obi\Resources\Compute\CollisionMaterial.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\DistanceFieldShape.compute" />
+    <None Include="Assets\Obi\Resources\Compute\FluidFoamDensity.compute" />
+    <None Include="Assets\Obi\Resources\Compute\FluidKernels.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\DeformableTriangles.compute" />
+    <None Include="Assets\Obi\Resources\Compute\RopeChainRendering.compute" />
+    <None Include="Assets\Obi\Resources\Compute\FluidMeshChunks.compute" />
+    <None Include="Assets\Obi\Resources\ObiMaterials\DistanceFields\DistanceFieldSlice.shader" />
+    <None Include="Assets\Obi\Resources\Compute\GridUtils.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\Integration.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\Rigidbody.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\TriangleMeshShape.compute" />
+    <None Include="Assets\Obi\Resources\Compute\ParticleMeshBuilding.compute" />
+    <None Include="Assets\Obi\Resources\Compute\SurfacePoint.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\Quaternion.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\BendTwistConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\ClothRendering.compute" />
+    <None Include="Assets\Obi\Resources\ObiMaterials\BuiltInStandardBackfaces\StandardVertexColors.shader" />
+    <None Include="Assets\Obi\Resources\Compute\Phases.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\PinConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\SolverParameters.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\FluidSurfaceMeshBuilding.compute" />
+    <None Include="Assets\Obi\Resources\Compute\ParticleCollisionConstraints.compute" />
+    <None Include="Assets\Obi\Resources\ObiMaterials\Common\ObiEllipsoids.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\ShapeMatchingConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\ContactHandling.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\ParticleGrid.compute" />
+    <None Include="Assets\Obi\Resources\Compute\DistanceConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\RopeMeshRendering.compute" />
+    <None Include="Assets\Obi\Resources\Compute\FluidFoam.compute" />
+    <None Include="Assets\Obi\Resources\Compute\AerodynamicConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\Simplex.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\StretchShearConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\RopeLineRendering.compute" />
+    <None Include="Assets\Obi\Resources\Compute\HeightfieldShape.compute" />
+    <None Include="Assets\Obi\Resources\Compute\AtomicDeltas.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\ChainConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\QueryDefinitions.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\SphereShapeQuery.compute" />
+    <None Include="Assets\Obi\Resources\Compute\SkinConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\DistanceFunctions.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\SphereShape.compute" />
+    <None Include="Assets\Obi\Resources\Compute\InterlockedUtils.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\SpatialQueries.compute" />
+    <None Include="Assets\Obi\Resources\Compute\SortParticleData.compute" />
+    <None Include="Assets\Obi\Resources\ObiMaterials\Common\ObiEllipsoidsHDRP.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\FluidChunkDefs.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\RayShapeQuery.compute" />
+    <None Include="Assets\Obi\Resources\Compute\TetherConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\ColliderFrictionConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\RopeExtrudedRendering.compute" />
+    <None Include="Assets\Obi\Resources\Compute\InertialFrame.cginc" />
+    <None Include="Assets\Obi\CHANGELOG_rope.txt" />
+    <None Include="Assets\Obi\Resources\Compute\BoxShape.compute" />
+    <None Include="Assets\Obi\Resources\ObiMaterials\Common\Instanced\Compute\ProceduralInstancing.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\StitchConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\CapsuleShape.compute" />
+    <None Include="Assets\Obi\Resources\Compute\ParticleFrictionConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\BoundsReduction.compute" />
+    <None Include="Assets\Obi\Resources\Compute\Transform.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\BitonicSort.compute" />
+    <None Include="Assets\Obi\Resources\Compute\VolumeConstraints.compute" />
+    <None Include="Assets\Obi\Resources\Compute\ColliderDefinitions.cginc" />
+    <None Include="Assets\Obi\Resources\ObiMaterials\Common\ObiUtils.cginc" />
+    <None Include="Assets\Obi\Resources\Compute\Solver.compute" />
+    <None Include="Assets\Obi\Resources\Compute\ColliderGrid.compute" />
+    <None Include="Assets\Obi\Resources\Compute\ColliderCollisionConstraints.compute" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\6000.3.2f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
       <Private>False</Private>
@@ -1184,6 +1269,10 @@
       <HintPath>Library\ScriptAssemblies\Unity.PlasticSCM.Editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Jobs">
+      <HintPath>Library\ScriptAssemblies\Unity.Jobs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.Burst.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.Burst.Editor.dll</HintPath>
       <Private>False</Private>
@@ -1345,6 +1434,14 @@
     <ProjectReference Include="FluidFrenzyEditor.csproj">
       <Project>{E8C8ECA0-B315-9089-8DD5-81486B3299DE}</Project>
       <Name>FluidFrenzyEditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Obi.Editor.csproj">
+      <Project>{7C2E22B3-520F-9362-2386-E01461C996CD}</Project>
+      <Name>Obi.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Obi.csproj">
+      <Project>{481EA312-A379-6A58-FD23-C40A55B5449A}</Project>
+      <Name>Obi</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
