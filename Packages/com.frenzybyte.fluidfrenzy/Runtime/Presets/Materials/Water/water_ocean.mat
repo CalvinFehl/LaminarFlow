@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: water_ocean
+  m_Shader: {fileID: 4800000, guid: e80f85116a2a050418071594363e93f4, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords:
+  - _FOAMMODE_MASK
+  - _FOAM_NORMALMAP
+  - _NORMALMAP
+  - _PLANAR_REFLECTION_ON
+  - _SCREENSPACE_REFRACTION_ON
+  - _SHADOWMAP_SOFT
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 2510
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _FoamNormalMap:
+        m_Texture: {fileID: 2800000, guid: 515665f7ae9a0ea43813c2fc519aafdf, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FoamTexture:
+        m_Texture: {fileID: 2800000, guid: d9c0a257bf4d677459904cda190c0eb7, type: 3}
+        m_Scale: {x: 15, y: 15}
+        m_Offset: {x: 0, y: 0}
+    - _WaveNormals:
+        m_Texture: {fileID: 2800000, guid: 02efeb67b3ea8be4580b653995b06ba5, type: 3}
+        m_Scale: {x: 30, y: 30}
+        m_Offset: {x: 0, y: 0}
+    m_Ints:
+    - _DisplacementWaves: 0
+    - _DstBlend: 0
+    - _FoamMode: 2
+    - _FoamScreenSpace: 0
+    - _PlanarReflections: 1
+    - _ScreenSpaceRefraction: 1
+    - _ShadowMap: 2
+    - _SrcBlend: 1
+    m_Floats:
+    - _AbsorptionDepthScale: 1
+    - _DisplacementPhase: 1
+    - _DisplacementScale: 200
+    - _DisplacementSteepness: 0
+    - _DisplacementWaveAmplitude: 0.25
+    - _DisplacementWaveLength: 2
+    - _DisplacementWaveSpeed: 0.1
+    - _ExponentialClipOffset: 0.25
+    - _FadeHeight: 0.1
+    - _FoamNormalStrength: 0.5
+    - _Layer: 0
+    - _LinearClipOffset: 0
+    - _ReflectionDistortion: 0.2
+    - _ReflectivityMin: 0
+    - _RefractionDistortion: 0.162
+    - _ScatterAmbient: 1
+    - _ScatterFoamIntensity: 0.761
+    - _ScatterIntensity: 0.42
+    - _ScatterLightIntensity: 1
+    - _ScatterViewIntensity: 1
+    - _SpecularIntensity: 1
+    - _WaveNormalStrength: 0.5
+    m_Colors:
+    - _FoamColor: {r: 0.85, g: 0.85, b: 0.85, a: 0.9098039}
+    - _FoamVisibility: {r: 0, g: 1, b: 0, a: 0}
+    - _ScatterColor: {r: 0, g: 0.25885868, b: 0.4245283, a: 1}
+    - _WaterColor: {r: 0, g: 0.14182392, b: 0.20754719, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

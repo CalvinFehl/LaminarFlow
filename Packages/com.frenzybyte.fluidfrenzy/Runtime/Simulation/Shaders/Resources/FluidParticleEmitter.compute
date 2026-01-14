@@ -1,0 +1,136 @@
+#pragma kernel InitParticles
+#pragma kernel UpdateParticle
+#pragma kernel UpdateParticleReadSimulation
+
+#include  "Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/FluidSimulationCommon.hlsl"
+#include  "Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/FluidParticlesEmitter.hlsl"
+
+#define NUM_THREADS 256
+
+AppendStructuredBuffer<uint> _DrawIndices;
+RWStructuredBuffer<uint> _DrawArgs;
+
+float2 _AdvectScale;
+
+int CalculateDispatchComputeSize(uint total, uint threadGroupCnt)
+{
+	return (total + threadGroupCnt - 1) / threadGroupCnt;
+}
+
+[numthreads(NUM_THREADS,1,1)]
+void InitParticles (uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _ParticleCount)
+		return;
+
+	if(id.x == 0)
+	{
+		_FreeIndices[0] = _ParticleCount;
+		_DrawArgs[2] = _DrawArgs[3] = _DrawArgs[4] = 0;
+		_DrawArgs[0] = 6;
+		_DrawArgs[1] = 1;
+	}
+
+	// Don't need - 1 because we use 0 as the count, and the size is actually + 1.
+    uint index = _ParticleCount - id.x;
+	_FreeIndices[index] = id.x;
+	_ParticleBuffer[id.x] = (Particle)(0);
+	_ParticleBuffer[id.x].position_size.xyz = -100000;
+}
+
+
+[numthreads(NUM_THREADS,1,1)]
+void UpdateParticle (uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _ParticleCount)
+		return;
+
+	int index = id.x;
+	Particle particle = _ParticleBuffer[index];
+
+	float2 life_maxlife = UnpackHalf2x16(particle.life_maxlife_color.x);
+	if(life_maxlife.x > 0)
+	{
+		life_maxlife.x -= _FluidSimDeltaTime;
+		particle.life_maxlife_color.x = PackHalf2x16(life_maxlife);
+
+		if (life_maxlife.x <= 0)
+		{
+			particle.position_size.xyz = -1000000;
+			particle.life_maxlife_color = 0;
+			int count = 0;
+			InterlockedAdd(_FreeIndices[0], 1, count);
+			_FreeIndices[count+1] = index;
+		}
+		else
+		{
+			float3 position = particle.position_size.xyz;
+			float2 unpackMiddle = UnpackHalf2x16(particle.vel_accel_rot_angularvel.y);
+			float3 velocity = float3(UnpackHalf2x16(particle.vel_accel_rot_angularvel.x), unpackMiddle.x);
+			float3 acceleration = float3(unpackMiddle.y, UnpackHalf2x16(particle.vel_accel_rot_angularvel.z));
+
+			velocity += acceleration * _FluidSimDeltaTime;
+			position += velocity * _FluidSimDeltaTime;
+
+			particle.position_size.xyz = position;
+
+			particle.vel_accel_rot_angularvel.x = PackHalf2x16(velocity.xy);
+			particle.vel_accel_rot_angularvel.y = PackHalf2x16(float2(velocity.z, acceleration.x));
+			particle.vel_accel_rot_angularvel.z = PackHalf2x16(acceleration.yz);
+			_DrawIndices.Append(index);
+		}
+
+		_ParticleBuffer[index] = particle;
+	}
+}
+
+SamplerState linear_clamp_sampler;
+
+
+[numthreads(NUM_THREADS,1,1)]
+void UpdateParticleReadSimulation (uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= _ParticleCount)
+		return;
+
+	int index = id.x;
+	Particle particle = _ParticleBuffer[index];
+
+	float2 life_maxlife = UnpackHalf2x16(particle.life_maxlife_color.x);
+	if(life_maxlife.x > 0)
+	{
+		float3 position = particle.position_size.xyz;
+		float2 unpackMiddle = UnpackHalf2x16(particle.vel_accel_rot_angularvel.y);
+		float3 velocity = float3(UnpackHalf2x16(particle.vel_accel_rot_angularvel.x), unpackMiddle.x);
+
+		float2 uvLookup = LocalPositionToSimulationUV(position.xyz);
+		float4 simData = _SimulationData.SampleLevel(linear_clamp_sampler, uvLookup, 0);
+		float2 sampledVelocity = simData.zw;
+		float sampledHeight = simData.x;
+		float sampledDepth = simData.y;
+
+		life_maxlife.x -= _FluidSimDeltaTime;
+		life_maxlife.x = sampledDepth < 0.001f ? 0 : life_maxlife.x;
+
+		position.xz += ((sampledVelocity * _AdvectScale ) + velocity.xz )* _FluidSimDeltaTime;
+		position.y = sampledHeight + 0.1;// + 0.5;
+
+		particle.life_maxlife_color.x = PackHalf2x16(life_maxlife);
+
+		particle.position_size.xyz = position;
+		if (life_maxlife.x <= 0)
+		{
+			particle.position_size.xyz = -1000000;
+			particle.life_maxlife_color = 0;
+			int count = 0;
+			InterlockedAdd(_FreeIndices[0], 1, count);
+			_FreeIndices[count+1] = index;
+		}
+		else
+		{
+			_DrawIndices.Append(index);
+		}
+
+		_ParticleBuffer[index] = particle;
+	}
+}

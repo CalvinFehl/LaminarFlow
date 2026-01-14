@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 2d3dc974479fe8741b7c36cd4e153761
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Scripts/RenderModule.cs
+  uploadId: 846442

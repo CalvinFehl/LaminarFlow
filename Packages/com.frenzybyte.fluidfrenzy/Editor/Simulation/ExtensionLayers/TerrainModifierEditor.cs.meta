@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: dbe23fe4173ed1f4b8833011c7834daa
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Editor/Simulation/ExtensionLayers/TerrainModifierEditor.cs
+  uploadId: 846442

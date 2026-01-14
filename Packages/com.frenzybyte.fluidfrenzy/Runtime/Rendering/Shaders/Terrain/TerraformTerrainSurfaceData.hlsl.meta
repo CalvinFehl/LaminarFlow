@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4f9765ce0f7de8641b02d483acac827b
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Terrain/TerraformTerrainSurfaceData.hlsl
+  uploadId: 846442

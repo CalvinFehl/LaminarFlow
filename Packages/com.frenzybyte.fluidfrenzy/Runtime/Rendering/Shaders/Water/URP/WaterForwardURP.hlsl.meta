@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4fd69a104c5ad9e4c8bbfe40e2d7a7d7
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Water/URP/WaterForwardURP.hlsl
+  uploadId: 846442

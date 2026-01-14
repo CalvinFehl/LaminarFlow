@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 734e059c8358e404e9428c271a51cdcd
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/FluidBoundary.shader
+  uploadId: 846442

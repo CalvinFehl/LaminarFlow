@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 7647de14097b1eb48a86d66f5b77060a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Editor/Simulation/Flow/FlowFluidSimulationSettingsEditor.cs
+  uploadId: 846442

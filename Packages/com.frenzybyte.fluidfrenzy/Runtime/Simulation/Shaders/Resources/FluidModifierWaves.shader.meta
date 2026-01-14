@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 7bda31e211e17b04eaec078b659e4b05
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/FluidModifierWaves.shader
+  uploadId: 846442

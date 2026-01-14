@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 84a22c52fa0ff1644a645b9eac866895
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Presets/Materials/Water/water_clear.mat
+  uploadId: 846442

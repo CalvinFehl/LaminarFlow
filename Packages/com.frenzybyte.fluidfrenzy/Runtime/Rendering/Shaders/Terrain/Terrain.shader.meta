@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 3899bd5ed2aebf448b39612e4bb3b716
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Terrain/Terrain.shader
+  uploadId: 846442

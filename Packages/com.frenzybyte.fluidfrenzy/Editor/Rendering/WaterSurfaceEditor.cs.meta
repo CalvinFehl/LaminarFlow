@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 2b1a388297386e54bb664df439b3a686
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Editor/Rendering/WaterSurfaceEditor.cs
+  uploadId: 846442

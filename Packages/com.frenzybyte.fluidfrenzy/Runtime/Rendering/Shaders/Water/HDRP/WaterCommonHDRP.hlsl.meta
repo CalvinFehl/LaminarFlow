@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: ed7f9aa8a979040498e91a3fc711ca3f
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Water/HDRP/WaterCommonHDRP.hlsl
+  uploadId: 846442

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 75c6fcf9d5848b24d93acb313ca57816
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/FluidPackHeightmap.shader
+  uploadId: 846442

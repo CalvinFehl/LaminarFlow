@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e4505f12b0f75b849a3714eec3191e23
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/Terraform/FluidTerraformCommon.hlsl
+  uploadId: 846442

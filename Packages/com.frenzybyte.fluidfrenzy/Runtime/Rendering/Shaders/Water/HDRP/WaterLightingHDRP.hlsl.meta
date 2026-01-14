@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 3f2fbe14149a0044d88a889c3bdadfe4
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Water/HDRP/WaterLightingHDRP.hlsl
+  uploadId: 846442

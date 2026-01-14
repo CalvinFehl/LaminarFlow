@@ -1,0 +1,254 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel StoreVelocityData
+#pragma kernel CopyVelocityData
+#pragma kernel CopyBorderData
+#pragma kernel StoreHeightData
+#pragma kernel CopyHeightData
+#pragma kernel ResetBorder
+
+#pragma multi_compile_local __ COPY_UP 
+#pragma multi_compile_local __ COPY_DOWN
+#pragma multi_compile_local __ COPY_LEFT
+#pragma multi_compile_local __ COPY_RIGHT
+
+#define USETEXTURE2D
+#include "Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/FluidSimulationCommon.hlsl"
+
+#define THREAD_PER_GROUP_X 32
+#define THREAD_PER_GROUP_Y 16
+
+#if COPY_UP
+Texture2D<float4> _VelocityReadUp;
+RWTexture2D<float4> _VelocityWriteUp;
+
+Texture2D<float4> _PressureReadUp;
+RWTexture2D<float4> _PressureWriteUp;
+#endif
+
+
+#if COPY_DOWN
+Texture2D<float4> _VelocityReadDown;
+RWTexture2D<float4> _VelocityWriteDown;
+
+Texture2D<float4> _PressureReadDown;
+RWTexture2D<float4> _PressureWriteDown;
+#endif
+
+
+#if COPY_RIGHT
+Texture2D<float4> _VelocityReadRight;
+RWTexture2D<float4> _VelocityWriteRight;
+
+Texture2D<float4> _PressureReadRight;
+RWTexture2D<float4> _PressureWriteRight;
+#endif
+
+
+#if COPY_LEFT
+Texture2D<float4> _VelocityReadLeft;
+RWTexture2D<float4> _VelocityWriteLeft;
+
+Texture2D<float4> _PressureReadLeft;
+RWTexture2D<float4> _PressureWriteLeft;
+#endif
+
+RWTexture2D<float4> _VelocityDst;
+RWTexture2D<float4> _PressureDst;
+
+float4 _ReadIndex;
+float4 _ReadScale;
+float4 _WriteIndex;
+
+uint _BoundarySize;
+
+[numthreads(THREAD_PER_GROUP_X, THREAD_PER_GROUP_Y,1)]
+void StoreVelocityData(uint3 id : SV_DispatchThreadID)
+{
+	int readIdLeft = _ReadIndex.x;
+	int readIdRight = _ReadIndex.y;
+	int readIdDown = _ReadIndex.z;
+	int readIdUp = _ReadIndex.w;
+
+	if (id.y > _BoundarySize)return;
+#if COPY_UP
+	_VelocityWriteUp[int2(id.x, id.y)] = float4(_VelocityReadUp[int2(id.x, readIdUp + id.y * _ReadScale.w)].xy, _PressureReadUp[int2(id.x, readIdUp + id.y * _ReadScale.w)].x, 0);
+#endif
+
+#if COPY_DOWN
+	_VelocityWriteDown[int2(id.x, id.y)] = float4(_VelocityReadDown[int2(id.x, readIdDown + id.y * _ReadScale.z)].xy, _PressureReadDown[int2(id.x, readIdDown + id.y * _ReadScale.z)].x, 0);
+#endif
+
+#if COPY_RIGHT
+	_VelocityWriteRight[int2(id.x, id.y)] = float4(_VelocityReadRight[int2(readIdRight + id.y * _ReadScale.y, id.x)].xy, _PressureReadRight[int2(readIdRight + id.y * _ReadScale.y, id.x)].x, 0);
+#endif
+
+#if COPY_LEFT
+	_VelocityWriteLeft[int2(id.x, id.y)] = float4(_VelocityReadLeft[int2(readIdLeft + id.y * _ReadScale.x, id.x)].xy, _PressureReadLeft[int2(readIdLeft + id.y * _ReadScale.x, id.x)].x, 0);
+#endif
+}
+
+
+[numthreads(THREAD_PER_GROUP_X, THREAD_PER_GROUP_Y, 1)]
+void CopyVelocityData(uint3 id : SV_DispatchThreadID)
+{
+	int writeIdLeft = _WriteIndex.x;
+	int writeIdRight = _WriteIndex.y;
+	int writeIdDown = _WriteIndex.z;
+	int writeIdUp = _WriteIndex.w;
+	if (id.y > _BoundarySize)return;
+
+#if COPY_UP
+	_VelocityDst[int2(id.x, writeIdUp + id.y)] = _VelocityReadUp[int2(id.x, id.y)];
+	_PressureDst[int2(id.x, writeIdUp + id.y)] = _PressureReadUp[int2(id.x, id.y)].zzzz;
+#endif
+
+#if COPY_DOWN
+	_VelocityDst[int2(id.x, writeIdDown + id.y)] = _VelocityReadDown[int2(id.x, id.y)];
+	_PressureDst[int2(id.x, writeIdDown + id.y)] = _PressureReadDown[int2(id.x, id.y)].zzzz;
+#endif
+
+#if COPY_RIGHT
+	_VelocityDst[int2(writeIdRight + id.y, id.x)] = _VelocityReadRight[int2(id.x, id.y)];
+	_PressureDst[int2(writeIdRight + id.y, id.x)] = _PressureReadRight[int2(id.x, id.y)].zzzz;
+#endif
+
+#if COPY_LEFT
+	_VelocityDst[int2(writeIdLeft + id.y, id.x)] = _VelocityReadLeft[int2(id.x, id.y)];
+	_PressureDst[int2(writeIdLeft + id.y, id.x)] = _PressureReadLeft[int2(id.x, id.y)].zzzz;
+#endif
+}
+
+
+#if COPY_UP
+Texture2D<float4> _SrcUp;
+RWTexture2D<float4> _DstUp;
+#endif
+
+#if COPY_DOWN
+Texture2D<float4> _SrcDown;
+RWTexture2D<float4> _DstDown;
+#endif
+
+#if COPY_RIGHT
+Texture2D<float4> _SrcRight;
+RWTexture2D<float4> _DstRight;
+#endif
+
+#if COPY_LEFT
+Texture2D<float4> _SrcLeft;
+RWTexture2D<float4> _DstLeft;
+#endif
+
+[numthreads(THREAD_PER_GROUP_X, THREAD_PER_GROUP_Y, 1)]
+void CopyBorderData(uint3 id : SV_DispatchThreadID)
+{
+	if (id.y > _BoundarySize)return;
+
+	int readIdLeft = _ReadIndex.x;
+	int readIdRight = _ReadIndex.y;
+	int readIdDown = _ReadIndex.z;
+	int readIdUp = _ReadIndex.w;
+
+	int writeIdLeft = _WriteIndex.x;
+	int writeIdRight = _WriteIndex.y;
+	int writeIdDown = _WriteIndex.z;
+	int writeIdUp = _WriteIndex.w;
+
+#if COPY_UP
+	_DstUp[int2(id.x, writeIdUp + id.y)] = _SrcUp[int2(id.x, readIdUp + id.y)];
+#endif
+
+#if COPY_DOWN
+	_DstDown[int2(id.x, writeIdDown + id.y)] = _SrcDown[int2(id.x, readIdDown + id.y)];
+#endif
+
+#if COPY_RIGHT
+	_DstRight[int2(writeIdRight + id.y, id.x)] = _SrcRight[int2(readIdRight + id.y, id.x)];
+#endif
+
+#if COPY_LEFT
+	_DstLeft[int2(writeIdLeft + id.y, id.x)] = _SrcLeft[int2(readIdLeft + id.y, id.x)];
+#endif
+}
+
+
+
+[numthreads(THREAD_PER_GROUP_X, 1, 1)]
+void StoreHeightData(uint3 id : SV_DispatchThreadID)
+{
+	int readIdLeft = _ReadIndex.x;
+	int readIdRight = _ReadIndex.y;
+	int readIdDown = _ReadIndex.z;
+	int readIdUp = _ReadIndex.w;
+
+	int writeIdLeft = _WriteIndex.x;
+	int writeIdRight = _WriteIndex.y;
+	int writeIdDown = _WriteIndex.z;
+	int writeIdUp = _WriteIndex.w;
+
+#if COPY_UP
+	_DstUp[int2(id.x, 0)] = _SrcUp[int2(id.x, readIdUp)];
+#endif
+#if COPY_DOWN
+	_DstDown[int2(id.x, 0)] = _SrcDown[int2(id.x, readIdDown)];
+#endif
+#if COPY_RIGHT
+	_DstRight[int2(id.x, 0)] = _SrcRight[int2(readIdRight, id.x)];
+#endif
+#if COPY_LEFT
+	_DstLeft[int2(id.x, 0)] = _SrcLeft[int2(readIdLeft, id.x)];
+#endif
+}
+
+RWTexture2D<float4> _HeightDst1;
+RWTexture2D<float4> _HeightDst2;
+
+[numthreads(THREAD_PER_GROUP_X, 1, 1)]
+void CopyHeightData(uint3 id : SV_DispatchThreadID)
+{
+	int writeIdLeft = _WriteIndex.x;
+	int writeIdRight = _WriteIndex.y;
+	int writeIdDown = _WriteIndex.z;
+	int writeIdUp = _WriteIndex.w;
+
+#if COPY_UP
+	_HeightDst1[int2(id.x, writeIdUp)] = _SrcUp[int2(id.x, 0)];
+	_HeightDst2[int2(id.x, writeIdUp)] = _SrcUp[int2(id.x, 0)];
+#endif
+
+#if COPY_DOWN
+	_HeightDst1[int2(id.x, writeIdDown)] = _SrcDown[int2(id.x, 0)];
+	_HeightDst2[int2(id.x, writeIdDown)] = _SrcDown[int2(id.x, 0)];
+#endif
+
+#if COPY_RIGHT
+	_HeightDst1[int2(writeIdRight, id.x)] = _SrcRight[int2(id.x, 0)];
+	_HeightDst2[int2(writeIdRight, id.x)] = _SrcRight[int2(id.x, 0)];
+#endif
+
+#if COPY_LEFT
+	_HeightDst1[int2(writeIdLeft, id.x)] = _SrcLeft[int2(id.x, 0)];
+	_HeightDst2[int2(writeIdLeft, id.x)] = _SrcLeft[int2(id.x, 0)];
+#endif
+}
+
+RWTexture2D<float4> _ResetDst;
+
+[numthreads(THREAD_PER_GROUP_X, 1, 1)]
+void ResetBorder(uint3 id : SV_DispatchThreadID)
+{
+	int writeIdLeft = _WriteIndex.x + 0;
+	int writeIdRight = _WriteIndex.y - 0;
+	int writeIdDown = _WriteIndex.z + 0;
+	int writeIdUp = _WriteIndex.w - 0;
+
+	_ResetDst[int2(id.x, writeIdUp)] = 0;
+	_ResetDst[int2(id.x, writeIdDown)] = 0;
+	_ResetDst[int2(writeIdRight, id.x)] = 0;
+	_ResetDst[int2(writeIdLeft, id.x)] = 0;
+
+	_ResetDst[int2(id.x, writeIdUp - 1)] = 0;
+	_ResetDst[int2(id.x, writeIdDown + 1)] = 0;
+	_ResetDst[int2(writeIdRight - 1, id.x)] = 0;
+	_ResetDst[int2(writeIdLeft + 1, id.x)] = 0;
+}
