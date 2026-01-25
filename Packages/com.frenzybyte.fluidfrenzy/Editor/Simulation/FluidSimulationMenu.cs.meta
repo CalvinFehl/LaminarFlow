@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 7b850aa5467b9d248844c8b81649977e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Editor/Simulation/FluidSimulationMenu.cs
+  uploadId: 846442

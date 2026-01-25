@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6f3916e7d331c3d4189c13d042bd2b1d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Scripts/ParticleEmitterDesc.cs
+  uploadId: 846442

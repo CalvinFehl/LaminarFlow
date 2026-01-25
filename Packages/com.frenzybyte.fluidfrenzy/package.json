@@ -1,0 +1,31 @@
+{
+  "name": "com.frenzybyte.fluidfrenzy",
+  "displayName": "Fluid Frenzy",
+  "version": "1.3.6",
+  "unity": "2021.3",
+  "keywords": [
+    "unity",
+    "physics",
+    "fluid",
+    "gpu",
+    "shaders"
+  ],
+  "description": "Fluid Frenzy is an interactive GPU-accelerated fluid simulation and renderer designed specifically for use with Unity Terrain and Custom terrains. This project aims to provide developers with a powerful toolset to create realistic, fun, interactive and immersive fluid dynamics in their Unity projects.",
+  "dependencies": {
+    "com.unity.render-pipelines.core": "10.10.1"
+  },
+  "documentationUrl": "https://frenzybyte.github.io/fluidfrenzy/docs/index/",
+  "licenseUrl": "https://unity.com/legal/as-terms",
+  "samples": [
+    {
+      "displayName": "Samples",
+      "description": "Fluid Frenzy contains five sample scenes to showcase the functionality and help with understanding how to work with the fluid simulation. You can import the samples using the <i>Package Manager</i>. To run the samples, open any of the scenes in the Samples~ folder and click play. Scenes can be loaded at runtime in the <b>Scenes</b> tab in the UI. See the documentation for more information.",
+      "path": "Samples~/"
+    }
+  ],
+  "author": {
+    "name": "Frenzy Byte",
+    "email": "fluidfrenzy@gmail.com",
+    "url": "https://frenzybyte.github.io/fluidfrenzy/"
+  }
+}

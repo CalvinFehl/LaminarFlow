@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 2ed3c2e9ea509d642863cac340a22fb9
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/README.md
+  uploadId: 846442

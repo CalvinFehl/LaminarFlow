@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: e80f85116a2a050418071594363e93f4
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _AbsorptionTexture: {instanceID: 0}
+  - _WaveDisplacement: {fileID: 2800000, guid: 7dafe84a292444c4b80ec5459ecd9687, type: 3}
+  - _WaveNormals: {fileID: 2800000, guid: 02efeb67b3ea8be4580b653995b06ba5, type: 3}
+  - _FoamTexture: {fileID: 2800000, guid: 64c12d2b4f9440045bb9334224ce76a9, type: 3}
+  - _FoamNormalMap: {fileID: 2800000, guid: 515665f7ae9a0ea43813c2fc519aafdf, type: 3}
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Water/Water.shader
+  uploadId: 846442

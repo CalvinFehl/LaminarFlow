@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: e9c9adf07fbf29c498f1d67e872f00e4
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/Terraform/FluidTerraformModifier.shader
+  uploadId: 846442

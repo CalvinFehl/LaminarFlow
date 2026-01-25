@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: de9dc3cea3e1ab84caa2bc0858510518
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Prefabs/Debug/FluidDebugViewer.mat
+  uploadId: 846442

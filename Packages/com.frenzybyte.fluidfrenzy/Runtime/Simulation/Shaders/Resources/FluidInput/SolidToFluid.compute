@@ -1,0 +1,507 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel SolidToFluidClearBuffers
+#pragma kernel SolidToFluidMesh
+#pragma kernel SolidToFluidSphere
+#pragma kernel SolidToFluidBox
+#pragma kernel SolidToFluidCapsule
+#pragma kernel ApplyAccumulatedDeltas
+
+#pragma multi_compile _ USE_FLUX_SIMULATION
+
+#define USETEXTURE2D
+#include "Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/FluidSimulationCommon.hlsl"
+
+StructuredBuffer<float3> _Vertices;
+RWTexture2D<float4> _HeightTarget;
+RWTexture2D<float4> _VelocityTarget;
+
+
+RWStructuredBuffer<int> _HeightAccumulatorBuffer;
+RWStructuredBuffer<uint> _VelocityAccumulatorBuffer; 
+
+float4x4 _LocalToWorld;
+float4x4 _PrevLocalToWorld;
+float _SolidToFluidScale;
+float _HeightInfluence;
+float _VelocityInfluence;
+
+uint _BufferWidth;
+uint _NumTriangles;
+uint _PointCount;
+
+// UNIFORMS NEEDED FOR THE Sphere
+float3 _SphereCenter;
+float _SphereRadius;
+float _PrimitiveArea;
+
+// UNIFORMS NEEDED FOR THE BOX
+float3 _BoxSize;
+float3 _ScaledBoxSize;
+float3 _BoxArea;
+int _BoxSamplesPerAxis;
+
+// UNIFORMS NEEDED FOR THE CAPSULE
+float _CapsuleRadius;
+float _CapsuleHeight;
+int _CapsuleDirection; // 0=X, 1=Y, 2=Z
+
+// Helper Functions for Fixed-Point Conversion
+#define PRECISION_16BIT 10000.0
+
+// Converts a float to a 16-bit signed integer
+int FloatToShort(float value)
+{
+    return (int)clamp(value * PRECISION_16BIT, -32767.0, 32767.0);
+}
+
+// Converts a 16-bit signed integer back to a float
+float ShortToFloat(int value)
+{
+    return (float)value / PRECISION_16BIT;
+}
+
+// Packs two signed 16-bit integers into a single 32-bit unsigned integer
+uint PackShort2(int x, int z)
+{
+    uint packed = (uint(x) & 0xFFFF) | ((uint(z) & 0xFFFF) << 16);
+    return packed;
+}
+
+// Unpacks a 32-bit unsigned integer back into two signed 16-bit integers
+int2 UnpackShort2(uint packed)
+{
+    int x = (int)(packed & 0xFFFF);
+    int z = (int)(packed >> 16);
+
+    int x_signed = (x << 16) >> 16;
+    int z_signed = (z << 16) >> 16;
+    
+    return int2(x_signed, z_signed);
+}
+
+// Helper function to convert 2D coordinates to a 1D index
+uint IndexFromCoord(int2 coord)
+{
+    return coord.y * _BufferWidth + coord.x;
+}
+
+// The robust, packed atomic add function
+void InterlockedAddPackedVelocity(RWStructuredBuffer<uint> buffer, uint index, int2 delta)
+{
+    uint original_packed, new_packed, read_packed;
+    // 2. Use the buffer index instead of texture coordinates
+    InterlockedOr(buffer[index], 0, original_packed);
+    
+    [loop]
+    while (true)
+    {
+        int2 original_unpacked = UnpackShort2(original_packed);
+        int2 new_unpacked = original_unpacked + delta;
+        new_packed = PackShort2(new_unpacked.x, new_unpacked.y);
+        
+        // 3. Use the buffer index instead of texture coordinates
+        InterlockedCompareExchange(buffer[index], original_packed, new_packed, read_packed);
+		
+        if (read_packed == original_packed) break;
+        original_packed = read_packed;
+    }
+}
+
+// This function encapsulates the logic for handling a single intersection point.
+// It calculates the fluid interaction (height and velocity changes) and returns the result.
+void ApplyFluidCoupling(
+	in float3 position,
+	in float3 normal,
+	in float3 solidVelocity,
+	in float totalFluidHeight,
+	in float2 currentFluidVelocityXZ, 
+	in float subTriangleArea,
+	in int numsteps,
+	out float heightDelta,
+	out float2 velocityDelta
+	)
+{
+	solidVelocity = solidVelocity * _SolidToFluidScale;
+
+	// Calculate the depth of the intersection point below the fluid surface.
+	float depthBelowSurface = totalFluidHeight - position.y;
+
+	heightDelta = 0;
+	velocityDelta = 0;
+	// Apply fluid coupling logic only if the point is submerged.
+	if (depthBelowSurface > 0.0f )
+	{
+		// Define constants based on the paper's recommendations.
+		const float lambdaDecayRate = 1.0f; // λ = 1
+		const float Cdis = _HeightInfluence;            // C_dis = 1.0 (Controls height effect)
+		const float Cadapt = _VelocityInfluence;          // C_adapt = 0.2 (Controls velocity effect)
+
+		// Calculate the decay factor based on submergence depth.
+		float decayFactor = exp(lambdaDecayRate * (-depthBelowSurface));
+		float cellSizeSquared = WORLD_CELLSIZE_LAYER1.x * WORLD_CELLSIZE_LAYER1.x;
+
+		// Get the normal of the sphere at the intersection point.
+		float3 solidDirectionNormalized = normal;
+
+		// Calculate the relative velocity between the solid and the fluid.
+		float3 relativeVelocity = solidVelocity - float3(currentFluidVelocityXZ.x, 0.0f, currentFluidVelocityXZ.y);
+
+		// Calculate the volume of fluid displaced by this point.
+		float displacedVolume = dot(solidDirectionNormalized, relativeVelocity) * subTriangleArea * _VelocityDeltaTime;
+
+		// Accumulate the change in height.
+		heightDelta = decayFactor * (displacedVolume / (numsteps * cellSizeSquared)) * Cdis;
+		#if USE_FLUX_SIMULATION
+			heightDelta = max(0, heightDelta);
+		#endif
+
+		// Calculate the coefficient for the velocity update.
+		float sgn = (solidDirectionNormalized.y > 0.0f) ? 1.0f : -1.0f;
+		float velocityCoeff = min(1.0f, decayFactor * Cadapt * (depthBelowSurface / totalFluidHeight) * sgn * (_VelocityDeltaTime / cellSizeSquared));
+
+		// Accumulate the change in velocity.
+		#if USE_FLUX_SIMULATION
+			velocityDelta = velocityCoeff * length(solidVelocity.xz - currentFluidVelocityXZ);
+		#else
+			velocityDelta = velocityCoeff * (solidVelocity.xz - currentFluidVelocityXZ * _WorldCellSize.xy);
+		#endif
+	}
+}
+
+void ProcessSolid(float3 localPosition, float3 localNormal, float area)
+{
+	float3 position = mul(_LocalToWorld, float4(localPosition, 1)).xyz;
+	float3 prevPosition = mul(_PrevLocalToWorld, float4(localPosition, 1)).xyz;
+	float3 normal = mul((float3x3)_LocalToWorld, localNormal).xyz;
+
+	float3 solidVelocity = position - prevPosition;
+
+	int numsteps = min(10,max(1, floor(length(solidVelocity) / _WorldSize.x * _Simulation_TexelSize.z + 0.5f)));
+
+	[loop]
+	for(int i = 0; i < numsteps; i++)
+	{
+		float3 applyPos = prevPosition + solidVelocity * ((float)i / numsteps);
+
+		float2 uvPosition = LocalPositionToSimulationUV(applyPos);
+		uvPosition = TransformToPadded(uvPosition);
+		int2 texPosition = round(uvPosition * _Simulation_TexelSize.zw);
+		uint index = IndexFromCoord(texPosition); // Calculate index once
+
+		// Sample current fluid height and terrain height at this fragment's position.
+		float fluidSurfaceHeight = LoadFluidHeight(texPosition).x;
+		float terrainBaseHeight = LoadTerrainHeight(texPosition);
+		float totalFluidHeight = fluidSurfaceHeight + terrainBaseHeight;
+		
+		#if USE_FLUX_SIMULATION
+			float2 currentFluidVelocityXZ = 0;
+		#else
+			float2 currentFluidVelocityXZ = LoadVelocity(texPosition).xy;
+		#endif
+
+		float heightDelta = 0;
+		float2 velocityDelta = 0;
+		ApplyFluidCoupling(applyPos, normal, solidVelocity, totalFluidHeight, currentFluidVelocityXZ, area, numsteps, heightDelta, velocityDelta);
+
+        int height_int = FloatToShort(heightDelta);
+        InterlockedAdd(_HeightAccumulatorBuffer[index], height_int);
+
+#if USE_FLUX_SIMULATION
+        int2 vel_int = int2(FloatToShort(velocityDelta.x), 0);
+        InterlockedAddPackedVelocity(_VelocityAccumulatorBuffer, index, vel_int);
+#else
+        int2 vel_int = int2(FloatToShort(velocityDelta.x), FloatToShort(velocityDelta.y));
+        InterlockedAddPackedVelocity(_VelocityAccumulatorBuffer, index, vel_int);
+#endif
+
+	}
+}
+
+float GetWorldAreaByRecalculation(float3 v0_obj, float3 v1_obj, float3 v2_obj, float4x4 objectToWorld)
+{
+    // 1. Transform the three vertices from object space to world space.
+    float3 v0_world = mul(float4(v0_obj, 1.0), objectToWorld).xyz;
+    float3 v1_world = mul(float4(v1_obj, 1.0), objectToWorld).xyz;
+    float3 v2_world = mul(float4(v2_obj, 1.0), objectToWorld).xyz;
+
+    // 2. Calculate the area using the cross product of the world-space edges.
+    // The length of the cross product of two vectors is twice the area of the triangle they form.
+    float3 edge1 = v1_world - v0_world;
+    float3 edge2 = v2_world - v0_world;
+    float worldSpaceArea = length(cross(edge1, edge2)) * 0.5;
+
+    return worldSpaceArea;
+}
+
+[numthreads(1024, 1, 1)]
+void SolidToFluidClearBuffers (uint3 id : SV_DispatchThreadID)
+{
+    uint index = id.x;
+    if (index < _BufferWidth)
+    {
+        _HeightAccumulatorBuffer[index] = 0; 
+        _VelocityAccumulatorBuffer[index] = 0;
+    }
+}
+
+[numthreads(64,1,1)]
+void SolidToFluidMesh (uint3 id : SV_DispatchThreadID)
+{
+	if(id.x >= _NumTriangles)
+	{
+		return;
+	}
+	
+	uint idx0 = (id.x * 3)+ 0;
+	uint idx1 = (id.x * 3)+ 1;
+	uint idx2 = (id.x * 3)+ 2;
+
+	float3 v0 = _Vertices[idx0];
+	float3 v1 = _Vertices[idx1];
+	float3 v2 = _Vertices[idx2];
+
+	float3 e0 = v1 - v0;
+	float3 e1 = v2 - v0;
+
+	float3 normal = normalize(cross(e0, e1));
+	float area = GetWorldAreaByRecalculation(v0, v1, v2, _LocalToWorld);
+
+	float3 center = (v0 + v1 + v2) / 3.0f;
+
+	ProcessSolid(center, normal, area);
+}
+
+[numthreads(64,1,1)]
+void SolidToFluidSphere (uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _PointCount)
+    {
+        return;
+    }
+
+    // Fibonacci sphere generation, adapted for HLSL
+    float pointCount = (float)_PointCount;
+    float area = _PrimitiveArea / pointCount;
+
+    float goldenRatio = (1.0 + sqrt(5.0)) / 2.0;
+    float y = 1.0 - (id.x / (pointCount - 1.0)) * 2.0;
+    float r = sqrt(1.0 - y * y);
+    float theta = (id.x * 2.0 * 3.14159265) / goldenRatio;
+        
+    float3 localNormal;
+    sincos(theta, localNormal.z, localNormal.x);
+    localNormal.x *= r;
+    localNormal.z *= r;
+    localNormal.y = y;
+	localNormal = normalize(localNormal);
+        
+    float3 localPosition = localNormal * _SphereRadius;
+
+	ProcessSolid(localPosition, localNormal, area);
+}
+
+
+
+[numthreads(64,1,1)]
+void SolidToFluidBox(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _PointCount)
+    {
+        return;
+    }
+
+    float3 localPosition = 0;
+    float3 localNormal = float3(0, 1, 0);
+    float area = 1;
+
+    int samplesPerFace = _BoxSamplesPerAxis * _BoxSamplesPerAxis;
+    uint faceIndex = id.x / samplesPerFace;
+    uint indexOnFace = id.x % samplesPerFace;
+    uint u_coord = indexOnFace % _BoxSamplesPerAxis;
+    uint v_coord = indexOnFace / _BoxSamplesPerAxis;
+    
+    float3 extents = _BoxSize / 2.0;
+    
+    float3 u_axis = 0, v_axis = 0;
+
+    switch (faceIndex)
+    {
+        case 0: // +X Face
+            localNormal = float3(1,0,0);
+            u_axis = float3(0,0,_BoxSize.z); // U is along Z axis, scaled by Z size
+            v_axis = float3(0,_BoxSize.y,0); // V is along Y axis, scaled by Y size
+            break;
+        case 1: // -X Face
+            localNormal = float3(-1,0,0);
+            u_axis = float3(0,0,-_BoxSize.z); // Inverted for correct winding
+            v_axis = float3(0,_BoxSize.y,0);
+            break;
+        case 2: // +Y Face
+            localNormal = float3(0,1,0);
+            u_axis = float3(_BoxSize.x,0,0); // U is along X axis, scaled by X size
+            v_axis = float3(0,0,_BoxSize.z); // V is along Z axis, scaled by Z size
+            break;
+        case 3: // -Y Face
+            localNormal = float3(0,-1,0);
+            u_axis = float3(_BoxSize.x,0,0);
+            v_axis = float3(0,0,-_BoxSize.z); // Inverted for correct winding
+            break;
+        case 4: // +Z Face
+            localNormal = float3(0,0,1);
+            u_axis = float3(_BoxSize.x,0,0); // U is along X axis, scaled by X size
+            v_axis = float3(0,_BoxSize.y,0); // V is along Y axis, scaled by Y size
+            break;
+        case 5: // -Z Face
+            localNormal = float3(0,0,-1);
+            u_axis = float3(-_BoxSize.x,0,0); // Inverted for correct winding
+            v_axis = float3(0,_BoxSize.y,0);
+            break;
+    }
+    // ---------------------------------------------------------------------------------
+
+    // The area is based on the size components that correspond to the U and V axes
+    area = dot(_BoxArea, abs(localNormal)) / samplesPerFace;
+    
+    // Calculate the position on the face's 2D grid
+    float u_pos = 0.0, v_pos = 0.0;
+    float divisor = (float)(_BoxSamplesPerAxis - 1);
+    u_pos = (u_coord / divisor - 0.5);
+    v_pos = (v_coord / divisor - 0.5);
+
+    // Construct the final position from the base, normal, and the two scaled basis vectors
+    float3 faceCenter = localNormal * dot(extents, abs(localNormal));
+    
+    localPosition = faceCenter + (u_axis * u_pos) + (v_axis * v_pos);
+
+    ProcessSolid(localPosition, localNormal, area);
+}
+
+// This is the main function for the capsule kernel
+[numthreads(64,1,1)]
+void SolidToFluidCapsule(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _PointCount)
+    {
+        return;
+    }
+
+    // Procedural Point Generation for a Capsule
+    float3 localPosition = 0;
+    float3 localNormal;
+    float area = _PrimitiveArea / (float)_PointCount;
+
+    // 1. Proportionally divide points between the hemispherical caps and the cylinder body
+    float radius = _CapsuleRadius;
+    float height = max(_CapsuleHeight, radius * 2.0); // Ensure height is valid
+    float cylinderHeight = height - 2.0 * radius;
+
+    float sphereArea = 4.0 * 3.14159265 * radius * radius;
+    float cylinderArea = 2.0 * 3.14159265 * radius * cylinderHeight;
+    
+    // The number of points that should be generated on the two caps
+    uint pointsForCaps = (uint)(_PointCount * (sphereArea / (sphereArea + cylinderArea)));
+
+    // 2. Check if this thread's ID falls within the range for the caps or the cylinder
+    if (id.x < pointsForCaps)
+    {
+        // This thread is on one of the HEMISPHERICAL CAPS
+        float pointCount = (float)pointsForCaps;
+        float goldenRatio = (1.0 + sqrt(5.0)) / 2.0;
+        
+        // Use Fibonacci sphere logic to generate a point on a unit sphere
+        float y = 1.0 - (id.x / (pointCount - 1.0)) * 2.0;
+        float r = sqrt(1.0 - y * y);
+        float theta = (id.x * 2.0 * 3.14159265) / goldenRatio;
+        
+        sincos(theta, localNormal.z, localNormal.x);
+        localNormal.x *= r;
+        localNormal.z *= r;
+        localNormal.y = y;
+
+        // Determine if it's the top (y > 0) or bottom cap and find its center
+        float3 capCenter = 0;;
+        // The capsule is generated as if it's Y-aligned first
+        capCenter.y += (y > 0 ? 1.0 : -1.0) * (cylinderHeight / 2.0);
+        
+        localPosition = capCenter + localNormal * radius;
+    }
+    else
+    {
+        // This thread is on the CYLINDRICAL BODY
+        uint cylinder_id = id.x - pointsForCaps;
+        uint pointsForCylinder = _PointCount - pointsForCaps;
+        
+        // Determine the grid size for the cylinder wall
+        int rows = (int)max(2, round(sqrt(pointsForCylinder * (cylinderHeight / (2.0 * 3.14159265 * radius)))));
+        int cols = (int)max(2, pointsForCylinder / rows);
+
+        uint i = cylinder_id / cols; // Row index
+        uint j = cylinder_id % cols; // Column index
+
+        // Calculate the height along the cylinder
+        float t = (float)i / (rows - 1.0);
+        float yPos = lerp(-cylinderHeight / 2.0, cylinderHeight / 2.0, t);
+
+        // Calculate the angle around the cylinder
+        float angle = (float)j / cols * 2.0 * 3.14159265;
+        
+        // Calculate the normal (points outwards from the center axis)
+        sincos(angle, localNormal.z, localNormal.x);
+        localNormal.y = 0;
+
+        // Calculate the position on the cylinder wall (assuming Y-aligned)
+        localPosition.x += localNormal.x * radius;
+        localPosition.y += yPos;
+        localPosition.z += localNormal.z * radius;
+    }
+    
+    // 3. Reorient the generated point if the capsule is aligned to the X or Z axis
+    if (_CapsuleDirection == 0) // X-Axis
+    {
+        localPosition = localPosition.yxz;
+        localNormal = localNormal.yxz;
+    }
+    else if (_CapsuleDirection == 2) // Z-Axis
+    {
+        localPosition = localPosition.xzy;
+        localNormal = localNormal.xzy;
+    }
+
+    ProcessSolid(localPosition, localNormal, area);
+}
+
+[numthreads(8,8,1)]
+void ApplyAccumulatedDeltas(uint3 id : SV_DispatchThreadID)
+{
+    // Bounds check
+    uint width, height;
+    _HeightTarget.GetDimensions(width, height);
+    if (id.x >= width || id.y >= height)
+    {
+        return;
+    }
+	
+	uint index = IndexFromCoord(id.xy);
+
+    int height_int = _HeightAccumulatorBuffer[index];
+	uint vel_packed = _VelocityAccumulatorBuffer[index];
+	int2 vel_unpacked = UnpackShort2(vel_packed);
+
+	float heightDelta = ShortToFloat(height_int);
+	float2 velocityDelta = float2(
+		ShortToFloat(vel_unpacked.x),
+		ShortToFloat(vel_unpacked.y)
+	);
+
+	// Apply the final, smooth result
+	_HeightTarget[id.xy] = float4(LoadFluidHeight(id.xy).x + heightDelta, 0, 0, 0);
+
+#if USE_FLUX_SIMULATION
+	_VelocityTarget[id.xy] += float4(velocityDelta, 0, 0);
+#else
+	_VelocityTarget[id.xy] = float4(LoadVelocity(id.xy).xy + velocityDelta, 0, 0);
+#endif
+
+	_HeightAccumulatorBuffer[index] = 0;
+	_VelocityAccumulatorBuffer[index] = 0;
+}

@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 2da16a92cbd32f4468a6dcd89d6ca658
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures:
+  - _HeatLUT: {instanceID: 0}
+  - _MainTex: {fileID: 2800000, guid: a53814ce5a59ab345b699aad6a11c764, type: 3}
+  - _BumpMap: {fileID: 2800000, guid: 26bd6d54b63b06246bd665e4a4e71f3c, type: 3}
+  - _EmissionMap: {fileID: 2800000, guid: 852b6366474a24446b5ea9620492b44f, type: 3}
+  - _Noise: {fileID: 2800000, guid: e2c597338862312478c86244d92332e7, type: 3}
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Lava/Lava.shader
+  uploadId: 846442

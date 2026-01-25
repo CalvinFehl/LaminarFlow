@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: e85c9878f8fca6f47bb43e18c5d67dba
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/FluidInput/FluidAdd.shader
+  uploadId: 846442

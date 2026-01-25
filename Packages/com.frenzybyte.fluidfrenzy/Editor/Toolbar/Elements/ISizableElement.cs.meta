@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 1940b3a5886cfd94296b1bbcd1717a25
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Editor/Toolbar/Elements/ISizableElement.cs
+  uploadId: 846442

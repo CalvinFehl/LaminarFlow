@@ -1,0 +1,963 @@
+using System.Collections.Generic;
+using System.Linq;
+using Unity.Collections;
+using Unity.Jobs;
+using UnityEngine;
+using Unity.Burst;
+using static FluidFrenzy.FluidRigidBody;
+using System;
+
+namespace FluidFrenzy
+{
+
+	/// <summary>
+	/// Enables high-fidelity, two-way physics coupling between a <see cref="Rigidbody"/> and a <see cref="FluidSimulation"/>'s heightfield grid, allowing the body to be affected by the fluid and to generate displacement, wakes, and splashes.
+	/// </summary>
+	/// <remarks>
+	/// <para>
+	/// The component performs geometry-to-fluid interaction using an optimized system that leverages **Unity Jobs** for multithreaded performance.
+	/// </para>
+	/// 
+	/// <h4>Prerequisite</h4>
+	/// <para>
+	/// To allow the CPU to access the fluid height for buoyancy calculations, the <see cref="FluidSimulationSettings.readBackHeight"/> (<c>CPU Height Read</c>) setting must be enabled on the <see cref="FluidSimulation"/>.
+	/// </para>
+	/// 
+	/// <h4>Fluid Density Calibration</h4>
+	/// <para>
+	/// To ensure objects float correctly, the global fluid density setting, accessed via <see cref="FluidSimulation.FluidDensity"/>, must be calibrated to match your project's physics scale (where mass and size often do not follow real-world proportions).
+	/// </para>
+	/// <para>
+	/// If Rigidbodies (e.g., a vehicle with a mass of 1500) sink when they should float, the fluid density is likely too low for that mass magnitude. A good starting point is to set the <see cref="FluidSimulation.FluidDensity"/> value to be similar to the mass of an average-sized object you expect to float.
+	/// </para>
+	/// 
+	/// <h4>Interaction Calculation</h4>
+	/// <list type="bullet">
+	/// 	<item>
+	/// 		<term>Fluid to Solids Coupling (Forces)</term>
+	/// 		<description>
+	/// 		The component calculates and applies realistic forces to the object's <see cref="Rigidbody"/>. Forces are determined by analyzing the volume and state of the body's submerged **sub-triangulated geometry** against the fluid's state. These include:
+	/// 		<ul>
+	/// 			<li><c>Buoyancy</c>: Calculated from the weight of the displaced fluid, based on the submerged volume.</li>
+	/// 			<li><c>Drag and Lift</c>: Applied based on the relative velocity of the body to the fluid.</li>
+	/// 		</ul>
+	/// 		</description>
+	/// 	</item>
+	/// 	<item>
+	/// 		<term>Solids to Fluid Coupling (Displacement)</term>
+	/// 		<description>
+	/// 		The object's movement displaces the fluid, generating wakes and splashes. This is calculated by applying the volume and velocity changes of the submerged sub-triangles to the fluid's closest <c>height field</c> and <c>velocity grid cells</c>. The effect is decayed exponentially with increasing distance from the surface.
+	/// 		</description>
+	/// 	</item>
+	/// 	<item>
+	/// 		<term>Requirements and Limitations</term>
+	/// 		<description>
+	/// 		The component requires a <see cref="Rigidbody"/> and a supported <see cref="Collider"/>, such as <see cref="MeshCollider"/>, <see cref="SphereCollider"/>, <see cref="BoxCollider"/>, or <see cref="CapsuleCollider"/>, on the same GameObject. This component is <c>not compatible with WebGL</c> due to its reliance on compute shaders.
+	/// 		</description>
+	/// 	</item>
+	/// </list>
+	/// </remarks>
+	public class FluidRigidBody : MonoBehaviour
+	{
+		public bool showVoxelGrid = false;
+		public bool showFluidToSolidSamplePoints = false;
+		public bool showSolidToFluidSamplePoints = false;
+
+		static HashSet<FluidRigidBody> uniqueFluidRigidBodies = new HashSet<FluidRigidBody>();
+		public static FluidRigidBody[] fluidRigidBodies { get; private set; } = new FluidRigidBody[0];
+		static void RegisterWaterInputObject(FluidRigidBody obj)
+		{
+			uniqueFluidRigidBodies.Add(obj);
+			if (uniqueFluidRigidBodies.Count == 0)
+			{
+				fluidRigidBodies = new FluidRigidBody[0];
+				return;
+			}
+			fluidRigidBodies = uniqueFluidRigidBodies.ToArray();
+		}
+
+		static void DeregisterWaterInputObject(FluidRigidBody obj)
+		{
+			uniqueFluidRigidBodies.Remove(obj);
+			if (uniqueFluidRigidBodies.Count == 0)
+			{
+				fluidRigidBodies = new FluidRigidBody[0];
+				return;
+			}
+			fluidRigidBodies = uniqueFluidRigidBodies.ToArray();
+		}
+
+		internal struct ForceResult
+		{
+			public Vector3 force;
+			public Vector3 position;
+			public bool apply;
+		}
+
+		internal struct FluidDataResult
+		{
+			public Vector2 heightData;
+			public Vector3 velocityData;
+			public bool isSubmerged;
+		}
+
+		/// <summary>
+		/// A container for the physics coefficients that define how a solid object
+		/// displaces and applies forces TO the fluid simulation. This controls the "splash"
+		/// and "wake" created by the object.
+		/// </summary>
+		[Serializable]
+		public struct FluidDisplacementProfile
+		{
+			/// <summary>
+			/// Controls how strongly the object's volume displaces the water's height.
+			/// This is the primary factor in determining the size of waves generated by the object.
+			/// </summary>
+			/// <remarks>
+			/// A higher value will cause the object to create larger waves and splashes upon impact,
+			/// making it feel like it's displacing more water. A value of 0 would mean the
+			/// object slices through the water without changing its height at all.
+			/// </remarks>
+			[Range(0f, 1f)]
+			public float heightInfluence;
+
+			/// <summary>
+			/// Controls how much of the object's velocity is transferred to the water,
+			/// creating currents and wakes.
+			/// </summary>
+			/// <remarks>
+			/// A higher value will cause the object to "drag" the water along with it more effectively, creating stronger
+			/// currents in its wake. A value of 0 would mean the object moves through the water without affecting its velocity.
+			/// </remarks>
+			[Range(0f, 1f)]
+			public float velocityInfluence;
+
+			/// <summary>
+			/// A multiplier that scales the velocity deltas.
+			/// This acts as a global artistic control for the object's overall displacement.
+			/// </summary>
+			/// <remarks>
+			/// This is a non-physical parameter useful for tuning the visual impact. You can use it
+			/// to exaggerate or dampen an object's effect without altering the more physically-based
+			/// ratio between its height and velocity displacement.
+			/// </remarks>
+			[Range(0f, 100f)]
+			public float velocityScale;
+
+			/// <summary>
+			/// Provides a set of default, balanced coefficients.
+			/// </summary>
+			public static FluidDisplacementProfile Default => new FluidDisplacementProfile
+			{
+				heightInfluence = 1.0f,
+				velocityInfluence = 0.2f,
+				velocityScale = 10.0f
+			};
+		}
+
+		/// <summary>
+		/// A container for the physics coefficients that define how a Rigidbody is affected by fluid forces (drag, lift).
+		/// </summary>
+		[Serializable]
+		public struct FluidInteractionProfile
+		{
+			/// <summary>
+			/// The drag coefficient (CD), representing how much the fluid resists the object's motion through it.
+			/// This is a dimensionless number that models the "thickness" or resistance of the fluid.
+			/// </summary>
+			/// <remarks>
+			/// A higher value increases resistance, making the object feel like it's moving through a thicker substance (e.g., mud or honey).
+			/// A lower value reduces resistance, making the object feel lighter and more slippery.
+			/// </remarks>
+			[Range(0f, 1f)]
+			public float dragCoefficient;
+
+			/// <summary>
+			/// The lift coefficient (CL), representing the force generated perpendicular to the direction of fluid flow.
+			/// This models how a surface's shape can act like a wing or a spoiler in the water.
+			/// </summary>
+			/// <remarks>
+			/// This can create an upward force (like on a hydrofoil) or a downward force (like a spoiler on a race car)
+			/// depending on the surface's angle relative to the flow. It's crucial for simulating dynamic, unstable behavior.
+			/// </remarks>
+			[Range(0f, 1f)]
+			public float liftCoefficient;
+
+			/// <summary>
+			/// The weighting factor that blends between using the full surface area and the
+			/// projected area that directly faces the fluid flow.
+			/// </summary>
+			/// <remarks>
+			/// A value of 0 means the object's orientation to the flow doesn't matter; it experiences the same drag from all sides.
+			/// A value of 1 means only the surface area directly facing the flow contributes, making the object highly sensitive to its angle.
+			/// A value of 0.5 provides a balanced mix.
+			/// </remarks>
+			[Range(0f, 1f)]
+			public float effectiveAreaWeight;
+
+			/// <summary>
+			/// Provides a set of default, balanced coefficients.
+			/// </summary>
+			public static FluidInteractionProfile Default => new FluidInteractionProfile
+			{
+				dragCoefficient = 0.5f,
+				liftCoefficient = 0.5f,
+				effectiveAreaWeight = 0.5f
+			};
+		}
+
+		/// <summary>
+		/// A global scalar to calibrate the fluid's density, primarily used to match the mass scale of the project.
+		/// </summary>
+		/// <remarks>
+		/// This value scales all buoyancy and drag forces. Its main purpose is to adapt the fluid simulation
+		/// to games that use realistic or high Rigidbody mass values. If your project's characters or vehicles
+		/// already have a mass of 1000+, you will need to set this density to a comparable value for them to float
+		/// and interact realistically, as the default physics forces would be too weak.
+		/// </remarks>
+		public static float FluidDensity = 1000;
+
+		/// <summary>
+		/// A toggle for the solid-to-fluid interaction. If true, this object will
+		/// displace the fluid, creating splashes and wakes.
+		/// </summary>
+		public bool applyFluidDisplacement = true;
+
+		/// <summary>
+		/// A profile containing the detailed physics parameters that control how this object
+		/// displaces the fluid (e.g., wave height, current strength).
+		/// </summary>
+		public FluidDisplacementProfile displacementProfile = FluidDisplacementProfile.Default;
+
+		/// <summary>
+		/// The area threshold used to recursively subdivide a MeshCollider's triangles for the solid-to-fluid displacement pass.
+		/// </summary>
+		/// <remarks>
+		/// Each triangle of the source mesh is checked against this value. If its area is larger, it is recursively split
+		/// into four smaller sub-triangles until all resulting triangles are below this area. This creates a higher-density
+		/// representation of the mesh, leading to more accurate and detailed fluid displacement (splashes and wakes).
+		/// Lowering this value increases visual quality at the cost of higher memory usage (for the GraphicsBuffer) and
+		/// GPU processing time.
+		/// </remarks>
+		public float subdivisionAreaThreshold = 0.25f;
+
+		/// <summary>
+		/// A toggle for the fluid-to-solid interaction. If true, the fluid will apply forces like buoyancy, drag, and lift to this object's Rigidbody.
+		/// </summary>
+		public bool applyFluidForcesToRigibody = true;
+
+		/// <summary>
+		/// The custom center of mass for the Rigidbody ofset, calculated in local space.
+		/// </summary>
+		/// <remarks>
+		/// By default, a Rigidbody's center of mass is at its geometric center, which is often too high for a boat,
+		/// making it "top-heavy" and prone to capsizing in turns or rough water.
+		///
+		/// By setting a negative Y value, you can artificially lower the center of mass, making the object "bottom-heavy."
+		/// This creates a strong restoring torque that resists rolling and keeps the object upright, similar to the keel on a real boat.
+		/// </remarks>
+		public Vector3 centerOfMassOffset = Vector3.zero;
+
+		/// <summary>
+		/// A profile containing the detailed physics parameters that control how the fluid affects this object (e.g., drag and lift coefficients).
+		/// </summary>
+		public FluidInteractionProfile interactionProfile = FluidInteractionProfile.Default;
+
+		/// <summary>
+		/// The size of the grid cells used to group the object's surface points for optimization.
+		/// </summary>
+		/// <remarks>
+		/// A performance tuning parameter that groups the object's surface points into a grid for optimized fluid sampling.
+		/// Smaller values increase accuracy at a potential performance cost. A good starting value
+		/// roughly matches the cell size of the fluid simulation.
+		/// </remarks>
+		public float samplingGroupSize = 1.0f;
+
+		/// <summary>
+		/// The total number of sample points to generate on the surface of a SphereCollider for the fluid-to-solid (buoyancy) calculations.
+		/// </summary>
+		public int sphereSampleCount = 128;
+
+		/// <summary>
+		/// The number of sample points to generate along each axis of a BoxCollider's face.
+		/// For example, a value of 8 will create an 8x8 grid of points on each of the 6 faces.
+		/// </summary>
+		public int boxFaceSampleCount = 8;
+
+		/// <summary>
+		/// The total number of sample points to generate on the surface of a CapsuleCollider,
+		/// distributed proportionally across its cylindrical body and hemispherical caps.
+		/// </summary>
+		public int capsuleSampleCount = 128;
+
+		/// <summary>
+		/// Every frame the FluidRigidBody checks if it is submerged, if it is this bool will be true for that frame
+		/// </summary>
+		public bool isSubmerged { get; private set; } = false;
+
+		private Collider m_collider;
+		protected Rigidbody m_rigidBody;
+		private Bounds m_localBounds;
+
+		private List<Vector3> m_subdividedTriangles;
+		private GraphicsBuffer m_vertexBuffer;
+
+		private Matrix4x4 m_previousLocalToWorld;
+		private NativeArray<Vector3> m_groupObjectSpaceCenters;
+
+		// Persistent NativeArrays for the Job System
+		private NativeArray<PrimitiveData> m_primitivePoints;
+		private NativeArray<int> m_primitiveToGroupIndex;
+
+		// Per-frame NativeArrays
+		private NativeArray<ForceResult> m_forceResults;
+		private NativeArray<FluidDataResult> m_fluidDataForGroups;
+
+		protected virtual void Awake()
+		{
+			RegisterWaterInputObject(this);
+
+			if (TryGetComponent(out Collider collider))
+			{
+				m_collider = collider;
+				if (collider is MeshCollider meshCollider)
+				{
+					PrecomputeMesh(meshCollider);
+				}
+				else
+				{
+					PrecomputePrimitiveSamples(collider);
+				}
+			}
+
+			m_rigidBody = GetComponent<Rigidbody>();
+		}
+
+		private void VoxelizeSamplePoints(List<PrimitiveData> points)
+		{
+			if (points == null || points.Count == 0)
+			{
+				Debug.LogError("Cannot voxelize an empty list of sample points.", this);
+				return;
+			}
+
+			// Step 1: Group point indices by their voxel coordinate
+			// We use a dictionary where the key is a 3D grid coordinate (the voxel)
+			// and the value is a list of indices of the points that fall into that voxel.
+			var tempGroups = new Dictionary<Vector3Int, List<int>>();
+
+			Vector3 scale = transform.lossyScale;
+			Vector3 localCellSize = new Vector3(
+				samplingGroupSize / scale.x,
+				samplingGroupSize / scale.y,
+				samplingGroupSize / scale.z
+			);
+
+			for (int i = 0; i < points.Count; i++)
+			{
+				Vector3 pointPos = points[i].center;
+
+				// Convert the local 3D position into a discrete grid coordinate.
+				Vector3Int gridCoord = new Vector3Int(
+					Mathf.FloorToInt(pointPos.x / localCellSize.x),
+					Mathf.FloorToInt(pointPos.y / localCellSize.y),
+					Mathf.FloorToInt(pointPos.z / localCellSize.z)
+				);
+
+				// If this is the first point in this voxel, create a new list for it.
+				if (!tempGroups.ContainsKey(gridCoord))
+				{
+					tempGroups[gridCoord] = new List<int>();
+				}
+				// Add the index of the current point to its corresponding voxel group.
+				tempGroups[gridCoord].Add(i);
+			}
+
+			// Step 2: Flatten the dictionary into NativeArrays for the Job System
+
+			// Create the main array of all sample points.
+			m_primitivePoints = new NativeArray<PrimitiveData>(points.ToArray(), Allocator.Persistent);
+
+			// This array will map each point to its group's index.
+			m_primitiveToGroupIndex = new NativeArray<int>(points.Count, Allocator.Persistent);
+
+			var groupCenters = new List<Vector3>();
+			int groupIndex = 0;
+
+			// Iterate through each unique group we found.
+			foreach (var group in tempGroups.Values)
+			{
+				Vector3 averageCenter = Vector3.zero;
+				// Iterate through each point within this group.
+				foreach (int pointIndex in group)
+				{
+					// Assign this group's index to the point.
+					m_primitiveToGroupIndex[pointIndex] = groupIndex;
+					// Add to the running total for calculating the average center.
+					averageCenter += points[pointIndex].center;
+				}
+				// Finalize the average center and add it to our list of group centers.
+				groupCenters.Add(averageCenter / group.Count);
+				groupIndex++;
+			}
+
+			// Step 3: Allocate all remaining persistent and per-frame NativeArrays
+
+			// This holds the average center of each unique voxel group.
+			m_groupObjectSpaceCenters = new NativeArray<Vector3>(groupCenters.ToArray(), Allocator.Persistent);
+
+			// These arrays are used each frame by the jobs. We allocate them once here to avoid garbage.
+			m_fluidDataForGroups = new NativeArray<FluidDataResult>(m_groupObjectSpaceCenters.Length, Allocator.Persistent);
+			m_forceResults = new NativeArray<ForceResult>(points.Count, Allocator.Persistent);
+		}
+
+		private void PrecomputeMesh(MeshCollider meshCollider)
+		{
+			Mesh mesh = meshCollider.sharedMesh;
+			Vector3[] vertices = mesh.vertices;
+			int[] triangles = mesh.triangles;
+			int triangleCount = triangles.Length / 3;
+
+			var tempTriangles = new List<PrimitiveData>(triangleCount);
+
+			m_localBounds = mesh.bounds;
+
+			m_subdividedTriangles = new List<Vector3>(triangles.Length / 3);
+
+			for (int i = 0; i < triangleCount; i++)
+			{
+				int triIndex = i * 3;
+				Vector3 v0 = vertices[triangles[triIndex]];
+				Vector3 v1 = vertices[triangles[triIndex + 1]];
+				Vector3 v2 = vertices[triangles[triIndex + 2]];
+				Vector3 center = (v0 + v1 + v2) / 3.0f;
+
+				tempTriangles.Add(new PrimitiveData
+				{
+					center = center,
+					edge1 = v1 - v0,
+					edge2 = v2 - v0
+				});
+
+				GraphicsHelpers.SubdivideTriangle(m_subdividedTriangles, v0, v1, v2, transform.lossyScale, subdivisionAreaThreshold);
+			}
+
+			VoxelizeSamplePoints(tempTriangles);
+
+			m_vertexBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, m_subdividedTriangles.Count, 12);
+			m_vertexBuffer.SetData(m_subdividedTriangles);
+		}
+
+		private void PrecomputePrimitiveSamples(Collider collider)
+		{
+			var points = new List<PrimitiveData>();
+
+			if (collider is SphereCollider sphere)
+			{
+				m_localBounds = new Bounds(sphere.center, Vector3.one * sphere.radius * 2);
+				PrimitiveGenerator.GenerateSphereSamples(points, sphere.center, sphere.radius, sphereSampleCount);
+			}
+			else if (collider is BoxCollider box)
+			{
+				m_localBounds = new Bounds(box.center, box.size);
+				PrimitiveGenerator.GenerateBoxSamples(points, box.center, box.size, boxFaceSampleCount);
+			}
+			else if (collider is CapsuleCollider capsuleCollider)
+			{
+				// Calculate approximate local bounds for a capsule
+				Vector3 size = Vector3.zero;
+				size[capsuleCollider.direction] = capsuleCollider.height;
+				int axis2 = (capsuleCollider.direction + 1) % 3;
+				int axis3 = (capsuleCollider.direction + 2) % 3;
+				size[axis2] = capsuleCollider.radius * 2;
+				size[axis3] = capsuleCollider.radius * 2;
+				m_localBounds = new Bounds(capsuleCollider.center, size);
+
+				PrimitiveGenerator.GenerateCapsuleSamples(points, capsuleCollider, capsuleSampleCount);
+			}
+
+			VoxelizeSamplePoints(points);
+		}
+
+		protected virtual void OnDestroy()
+		{
+			DeregisterWaterInputObject(this);
+
+			if (m_vertexBuffer != null && m_vertexBuffer.IsValid()) m_vertexBuffer.Dispose();
+			// Clean up all persistent NativeArrays to prevent memory leaks
+			if (m_primitivePoints.IsCreated) m_primitivePoints.Dispose();
+			if (m_primitiveToGroupIndex.IsCreated) m_primitiveToGroupIndex.Dispose();
+			if (m_groupObjectSpaceCenters.IsCreated) m_groupObjectSpaceCenters.Dispose();
+			if (m_forceResults.IsCreated) m_forceResults.Dispose();
+			if (m_fluidDataForGroups.IsCreated) m_fluidDataForGroups.Dispose();
+
+		}
+
+		private void OnEnable()
+		{
+			FluidSimulationManager.RequestObstacleUpdate(true);
+		}
+
+		private void OnDisable()
+		{
+			FluidSimulationManager.RequestObstacleUpdate(true);
+		}
+
+		// Start is called before the first frame update
+		protected virtual void Start()
+		{
+			m_previousLocalToWorld = transform.localToWorldMatrix;
+		}
+
+		public void Step(FluidSimulation fluidSimulation)
+		{
+			float areaPerCell = (fluidSimulation.dimension.x / fluidSimulation.settings.numberOfCells.x) * (fluidSimulation.dimension.y / fluidSimulation.settings.numberOfCells.y);
+			if (m_collider is SphereCollider sphereCollider)
+			{
+				float totalSurfaceArea = PrimitiveGenerator.GetSurfaceArea(sphereCollider);
+
+				int exactPointCount = Mathf.RoundToInt(totalSurfaceArea / areaPerCell);
+				fluidSimulation.ApplySolidToFluid_Sphere(sphereCollider.radius, totalSurfaceArea, exactPointCount, transform.localToWorldMatrix, m_previousLocalToWorld, displacementProfile);
+			}
+			else if (m_collider is BoxCollider boxCollider)
+			{
+				float totalSurfaceArea = PrimitiveGenerator.GetSurfaceArea(boxCollider);
+
+				int exactPointCount = Mathf.RoundToInt(totalSurfaceArea / areaPerCell);
+				fluidSimulation.ApplySolidToFluid_Box(boxCollider.size, exactPointCount, transform.localToWorldMatrix, m_previousLocalToWorld, displacementProfile);
+
+			}
+			else if (m_collider is CapsuleCollider capsuleCollider)
+			{
+				float totalSurfaceArea = PrimitiveGenerator.GetSurfaceArea(capsuleCollider);
+
+				int exactPointCount = Mathf.RoundToInt(totalSurfaceArea / areaPerCell);
+				fluidSimulation.ApplySolidToFluid_Capsule(capsuleCollider.radius, capsuleCollider.height, capsuleCollider.direction, totalSurfaceArea, exactPointCount, transform.localToWorldMatrix, m_previousLocalToWorld, displacementProfile);
+
+			}
+			else if (m_vertexBuffer != null && m_vertexBuffer.IsValid())
+			{
+				fluidSimulation.ApplySolidToFluid_Mesh(m_vertexBuffer, transform.localToWorldMatrix, m_previousLocalToWorld, displacementProfile);
+			}
+		}
+
+		public void PostUpdate()
+		{
+			m_previousLocalToWorld = transform.localToWorldMatrix;
+		}
+
+		protected virtual void FixedUpdate()
+		{
+			isSubmerged = false;
+			if (m_rigidBody && applyFluidForcesToRigibody)
+			{
+				m_rigidBody.ResetCenterOfMass();
+				m_rigidBody.centerOfMass += centerOfMassOffset;
+				ApplyFluidForces();
+			}
+		}
+
+		/// <summary>
+		/// Iterates through the sub-triangles and applies buoyancy, drag, and lift forces.
+		/// </summary>
+		private void ApplyFluidForces()
+		{
+			Matrix4x4 matrix = transform.localToWorldMatrix;
+
+			Bounds worldBounds = new Bounds(matrix.MultiplyPoint3x4(m_localBounds.center), m_localBounds.size);
+			worldBounds.Encapsulate(matrix.MultiplyPoint3x4(m_localBounds.max));
+			worldBounds.Encapsulate(matrix.MultiplyPoint3x4(m_localBounds.min));
+
+#if UNITY_6000_0_OR_NEWER
+			Vector3 rigidBodyVelocity = m_rigidBody.linearVelocity;
+#else
+			Vector3 rigidBodyVelocity = m_rigidBody.velocity;
+#endif
+
+			foreach (FluidSimulation simulation in FluidSimulationManager.simulations)
+			{
+				if (simulation == null || !simulation.isActiveAndEnabled || !simulation.bounds.Intersects(worldBounds))
+				{
+					continue;
+				}
+
+				FluidSimulation.FluidSimulationJobData jobData = simulation.GetSimulationDataForJob();
+				// JOB 1: Transform group centers and sample fluid data
+				var sampleJob = new SampleFluidDataJob
+				{
+					objectSpaceCenters = m_groupObjectSpaceCenters,
+					localToWorldMatrix = matrix,
+					fluidDataResults = m_fluidDataForGroups,
+					simBounds = jobData.bounds,
+					simResolution = jobData.resolution,
+					simDimension = jobData.dimension,
+					simCachedPosition = jobData.cachedPosition,
+					simHeightVelocityData = jobData.heightVelocityData
+				};
+				JobHandle sampleHandle = sampleJob.Schedule(m_groupObjectSpaceCenters.Length, 32);
+
+				// JOB 2: Calculate all triangle forces using the pre-sampled fluid data
+				var forceJob = new CalculateFluidForcesJob
+				{
+					triangles = m_primitivePoints,
+					triangleToGroupIndex = m_primitiveToGroupIndex,
+					groupFluidData = m_fluidDataForGroups,
+					localToWorldMatrix = matrix,
+					rigidbodyVelocity = rigidBodyVelocity,
+					rigidbodyAngularVelocity = m_rigidBody.angularVelocity,
+					rigidbodyCenterOfMass = m_rigidBody.worldCenterOfMass,
+					results = m_forceResults,
+					fluidDensity = FluidRigidBody.FluidDensity,
+					coefficients = interactionProfile
+				};
+				JobHandle forceHandle = forceJob.Schedule(m_primitivePoints.Length, 32, sampleHandle);
+
+				// Wait for completion
+				forceHandle.Complete();
+
+				// Apply results 
+				for (int i = 0; i < m_forceResults.Length; i++)
+				{
+					ForceResult result = m_forceResults[i];
+					if (result.apply)
+					{
+						m_rigidBody.AddForceAtPosition(result.force, result.position);
+						isSubmerged = true;
+					}
+				}
+			}
+		}
+
+		internal static Vector3 CalculateFluidForce(FluidDataResult fluidData, Vector3 worldCenter, float waterLevel, float worldArea, Vector3 worldNormal,
+			Vector3 rigidbodyVelocity, Vector3 rigidbodyAngularVelocity, Vector3 rigidbodyCenterOfMass, FluidInteractionProfile coefficients, float fluidDensity)
+		{
+			Vector3 totalForce = Vector3.zero;
+			float submergedDepth = waterLevel - worldCenter.y;
+			float buoyancyMagnitude = -Physics.gravity.y * fluidDensity * worldArea * submergedDepth * -worldNormal.y;
+			totalForce += new Vector3(0, buoyancyMagnitude, 0);
+
+			Vector3 pointVelocity = rigidbodyVelocity + Vector3.Cross(rigidbodyAngularVelocity, worldCenter - rigidbodyCenterOfMass);
+			Vector3 relativeVelocity = pointVelocity - fluidData.velocityData;
+
+			if (relativeVelocity.sqrMagnitude > 0.001f)
+			{
+				float dotNormalVel = Vector3.Dot(worldNormal, relativeVelocity);
+				if (dotNormalVel >= 0)
+				{
+					float relativeSpeed = relativeVelocity.magnitude;
+					float cosTheta = dotNormalVel / relativeSpeed;
+					float effectiveArea = worldArea * (cosTheta * coefficients.effectiveAreaWeight + (1 - coefficients.effectiveAreaWeight));
+
+					totalForce += -0.5f * coefficients.dragCoefficient * fluidDensity * effectiveArea * relativeSpeed * relativeVelocity;
+
+					Vector3 normalizedRelativeVel = relativeVelocity / relativeSpeed;
+					Vector3 liftDir = Vector3.Cross(Vector3.Cross(worldNormal, normalizedRelativeVel), relativeVelocity);
+					float liftMagnitude = 0.5f * coefficients.liftCoefficient * fluidDensity * effectiveArea * relativeSpeed;
+					totalForce += liftMagnitude * liftDir;
+				}
+			}
+
+			return totalForce;
+		}
+
+		// In your FluidRigidBody.cs class
+
+		void OnDrawGizmosSelected()
+		{
+			Gizmos.matrix = transform.localToWorldMatrix;
+			// This is the main entry point for gizmo drawing.
+			// It will always draw the predictive grid.
+			DrawVoxelGridGizmo();
+
+			if (GetComponent<MeshCollider>() != null)
+			{
+				DrawMeshSolidToFluidGizmos();
+			}
+			else if (TryGetComponent<Collider>(out var sphereCollider))
+			{
+				DrawColliderSolidToFluid(sphereCollider);
+			}
+
+			// It will ONLY draw the live sample points if the application is playing
+			// and the necessary data has been initialized.
+			if (Application.isPlaying)
+			{
+				DrawSamplePointsGizmo();
+			}
+			Gizmos.matrix = Matrix4x4.identity;
+		}
+
+		/// <summary>
+		/// Draws a wireframe grid representing the voxels that will be used for grouping.
+		/// This visualization correctly accounts for the object's non-uniform scale.
+		/// </summary>
+		private void DrawVoxelGridGizmo()
+		{
+			if (!showVoxelGrid || !TryGetComponent<Collider>(out var col)) return;
+
+			Bounds localBounds;
+			// Safely get the local bounds based on the collider type
+			if (col is MeshCollider mc && mc.sharedMesh != null) localBounds = mc.sharedMesh.bounds;
+			else if (col is SphereCollider sc) localBounds = new Bounds(sc.center, Vector3.one * sc.radius * 2);
+			else if (col is BoxCollider bc) localBounds = new Bounds(bc.center, bc.size);
+			else if (col is CapsuleCollider cc)
+			{
+				Vector3 size = Vector3.zero;
+				size[cc.direction] = cc.height;
+				int axis2 = (cc.direction + 1) % 3;
+				int axis3 = (cc.direction + 2) % 3;
+				size[axis2] = cc.radius * 2;
+				size[axis3] = cc.radius * 2;
+				localBounds = new Bounds(cc.center, size);
+			}
+			else return; // Unsupported collider or null mesh
+
+			// This is the exact same logic used in the VoxelizeSamplePoints function.
+			Vector3 scale = transform.lossyScale;
+
+			// Prevent division by zero if an axis is scaled to zero.
+			if (Mathf.Approximately(scale.x, 0) || Mathf.Approximately(scale.y, 0) || Mathf.Approximately(scale.z, 0))
+			{
+				return;
+			}
+
+			float worldCellSize = samplingGroupSize;
+			if (worldCellSize <= 0.001f) return;
+
+			// Create the "pre-squashed" local cell size. This will become a perfect cube in world space.
+			Vector3 localCellSize = new Vector3(
+				worldCellSize / scale.x,
+				worldCellSize / scale.y,
+				worldCellSize / scale.z
+			);
+			// -----------------------------------------------------------------------
+
+			Gizmos.color = new Color(1f, 1f, 1f, 0.25f);
+
+			// Calculate the number of cells needed, now using the correct local cell size.
+			Vector3Int cellCount = new Vector3Int(
+				Mathf.CeilToInt(localBounds.size.x / localCellSize.x),
+				Mathf.CeilToInt(localBounds.size.y / localCellSize.y),
+				Mathf.CeilToInt(localBounds.size.z / localCellSize.z)
+			);
+
+			Vector3 start = localBounds.min;
+
+			for (int x = 0; x < cellCount.x; x++)
+			{
+				for (int y = 0; y < cellCount.y; y++)
+				{
+					for (int z = 0; z < cellCount.z; z++)
+					{
+						Vector3 cellCenter = start + new Vector3(
+							(x + 0.5f) * localCellSize.x,
+							(y + 0.5f) * localCellSize.y,
+							(z + 0.5f) * localCellSize.z
+						);
+
+						// Draw a wire cube using the calculated localCellSize.
+						// When transformed by Gizmos.matrix, this will be a perfect cube in world space.
+						Gizmos.DrawWireCube(cellCenter, localCellSize);
+					}
+				}
+			}
+		}
+
+		/// <summary>
+		/// Draws the live, calculated sample points, colored by their voxel group index.
+		/// This will only be called when the application is playing.
+		/// </summary>
+		private void DrawSamplePointsGizmo()
+		{
+			if (!showFluidToSolidSamplePoints || m_groupObjectSpaceCenters == null || !m_groupObjectSpaceCenters.IsCreated || m_primitivePoints == null || !m_primitivePoints.IsCreated) return;
+
+			var groupColors = new List<Color>();
+			for (int i = 0; i < m_groupObjectSpaceCenters.Length; i++)
+			{
+				float hue = (i * 0.61803398875f) % 1.0f;
+				groupColors.Add(Color.HSVToRGB(hue, 0.9f, 1.0f));
+			}
+
+			for (int i = 0; i < m_primitivePoints.Length; i++)
+			{
+				int groupIndex = m_primitiveToGroupIndex[i];
+				if (groupIndex >= groupColors.Count) continue;
+				Gizmos.color = groupColors[groupIndex];
+				Vector3 worldPos = m_primitivePoints[i].center;
+				Gizmos.DrawSphere(worldPos, 0.05f);
+			}
+		}
+
+		private void DrawMeshSolidToFluidGizmos()
+		{
+			if(showSolidToFluidSamplePoints || m_subdividedTriangles == null || m_subdividedTriangles.Count < 3)
+			{
+				return;
+			}
+
+			Gizmos.matrix = transform.localToWorldMatrix;
+			Gizmos.color = Color.black;
+			float gizmoSize = subdivisionAreaThreshold / transform.lossyScale.magnitude;
+
+			for (int i = 0; i < m_subdividedTriangles.Count; i+=3)
+			{
+				Vector3 v0 = m_subdividedTriangles[i];
+				Vector3 v1 = m_subdividedTriangles[i + 1];
+				Vector3 v2 = m_subdividedTriangles[i + 2];
+				Vector3 center = (v0 + v1 + v2) / 3.0f;
+				Gizmos.DrawLine(v0, v1);
+				Gizmos.DrawLine(v1, v2);
+				Gizmos.DrawLine(v2, v0);
+
+				float a = Vector3.Distance(v1, v2);
+				float b = Vector3.Distance(v0, v2);
+				float c = Vector3.Distance(v0, v1);
+
+				float semiperimeter = (a + b + c) / 2.0f;
+				if (semiperimeter < 0.0001f) continue; // Avoid division by zero for degenerate triangles
+
+				float area = Mathf.Sqrt(semiperimeter * (semiperimeter - a) * (semiperimeter - b) * (semiperimeter - c));
+
+				// d) Calculate the final inradius
+				float inradius = (area / semiperimeter) * 0.25f;
+
+				Gizmos.DrawSphere(center, inradius);
+			}
+
+			Gizmos.matrix = Matrix4x4.identity;
+		}
+
+		private void DrawColliderSolidToFluid(Collider collider)
+		{
+			if (!showSolidToFluidSamplePoints)
+			{
+				return;
+			}
+			float areaPerCell = Mathf.Pow(FluidSimulationManager.GetEditorMainSimulation().cellWorldSize, 2.0f);
+
+			List<PrimitiveData> points = new List<PrimitiveData>(); ;
+
+			if (collider is SphereCollider sphere)
+			{
+				float totalSurfaceArea = PrimitiveGenerator.GetSurfaceArea(sphere);
+				int pointCount = Mathf.RoundToInt(totalSurfaceArea / areaPerCell);
+				PrimitiveGenerator.GenerateSphereSamples(points, sphere.center, sphere.radius, pointCount);
+			}
+			else if (collider is BoxCollider box)
+			{
+				float totalSurfaceArea = PrimitiveGenerator.GetSurfaceArea(box);
+				int pointCount = Mathf.RoundToInt(Mathf.Sqrt((totalSurfaceArea / areaPerCell) / 6));
+				PrimitiveGenerator.GenerateBoxSamples(points, box.center, box.size, pointCount);
+			}
+			else if (collider is CapsuleCollider capsuleCollider)
+			{
+				float totalSurfaceArea = PrimitiveGenerator.GetSurfaceArea(capsuleCollider);
+				int pointCount = Mathf.RoundToInt(totalSurfaceArea / areaPerCell);
+				PrimitiveGenerator.GenerateCapsuleSamples(points, capsuleCollider, pointCount);
+			}
+
+			if (points.Count <= 0) return;
+
+			// Set up the Gizmos for drawing in the object's local space.
+			Gizmos.matrix = transform.localToWorldMatrix;
+			Gizmos.color = Color.cyan;
+			float gizmoSize = areaPerCell / transform.lossyScale.magnitude;
+
+			for (int i = 0; i < points.Count; i++)
+			{
+				Vector3 localPosition = points[i].center;
+				Gizmos.DrawSphere(localPosition, gizmoSize);
+			}
+
+			Gizmos.matrix = Matrix4x4.identity;
+		}
+	}
+	// JOB 1: Samples the fluid simulation for each voxel group
+	#region Job Definitions
+#if FLUIDFRENZY_RUNTIME_BURST_SUPPORT
+	//[BurstCompile]
+#endif
+	internal struct SampleFluidDataJob : IJobParallelFor
+	{
+		[ReadOnly] public NativeArray<Vector3> objectSpaceCenters;
+		[WriteOnly] public NativeArray<FluidDataResult> fluidDataResults;
+		[ReadOnly] public Matrix4x4 localToWorldMatrix;
+
+		// Data for the one simulation we're sampling
+		[ReadOnly] public Bounds simBounds;
+		[ReadOnly] public Vector2Int simResolution;
+		[ReadOnly] public Vector3 simDimension;
+		[ReadOnly] public Vector3 simCachedPosition;
+		[ReadOnly] public NativeArray<long> simHeightVelocityData;
+
+		public void Execute(int i)
+		{
+			Vector3 worldCenter = localToWorldMatrix.MultiplyPoint3x4(objectSpaceCenters[i]);
+
+			if (simBounds.Contains(worldCenter))
+			{
+				FluidSimulation.GetHeightVelocity(worldCenter, simBounds, simDimension, simResolution.x, simResolution.y, simCachedPosition, simHeightVelocityData, out Vector2 hData, out Vector3 vData);
+				fluidDataResults[i] = new FluidDataResult { heightData = hData, velocityData = vData, isSubmerged = hData.x > worldCenter.y };
+			}
+			else
+			{
+				fluidDataResults[i] = new FluidDataResult { isSubmerged = false };
+			}
+		}
+	}
+
+
+	// JOB 2: The main force calculation job
+#if FLUIDFRENZY_RUNTIME_BURST_SUPPORT
+//	[BurstCompile]
+#endif
+	internal struct CalculateFluidForcesJob : IJobParallelFor
+	{
+		[ReadOnly] public NativeArray<PrimitiveData> triangles;
+		[ReadOnly] public NativeArray<int> triangleToGroupIndex;
+		[ReadOnly] public NativeArray<FluidRigidBody.FluidDataResult> groupFluidData;
+		[ReadOnly] public Matrix4x4 localToWorldMatrix;
+		[ReadOnly] public Vector3 rigidbodyVelocity;
+		[ReadOnly] public Vector3 rigidbodyAngularVelocity;
+		[ReadOnly] public Vector3 rigidbodyCenterOfMass;
+		[ReadOnly] public FluidInteractionProfile coefficients;
+		[ReadOnly] public float fluidDensity;
+		[WriteOnly] public NativeArray<ForceResult> results;
+
+		public void Execute(int i)
+		{
+			int groupIndex = triangleToGroupIndex[i];
+			FluidDataResult fluidData = groupFluidData[groupIndex];
+
+			if (!fluidData.isSubmerged)
+			{
+				results[i] = new ForceResult { force = Vector3.zero, position = Vector3.zero, apply = false };
+				return;
+			}
+
+			PrimitiveData tri = triangles[i];
+			Vector3 worldCenter = localToWorldMatrix.MultiplyPoint3x4(tri.center);
+			float waterLevel = fluidData.heightData.x;
+
+			if (waterLevel <= worldCenter.y)
+			{
+				results[i] = new ForceResult { force = Vector3.zero, position = Vector3.zero, apply = false };
+				return;
+			}
+
+			Vector3 worldEdge1 = localToWorldMatrix.MultiplyVector(tri.edge1);
+			Vector3 worldEdge2 = localToWorldMatrix.MultiplyVector(tri.edge2);
+			Vector3 worldNormalUnscaled = Vector3.Cross(worldEdge1, worldEdge2);
+			float normalMagnitude = worldNormalUnscaled.magnitude;
+			float worldArea = normalMagnitude * 0.5f;
+			Vector3 worldNormal = worldNormalUnscaled / normalMagnitude;
+
+			Vector3 totalForce = FluidRigidBody.CalculateFluidForce(fluidData, worldCenter, waterLevel, worldArea, worldNormal,
+				rigidbodyVelocity, rigidbodyAngularVelocity, rigidbodyCenterOfMass, coefficients, fluidDensity);
+
+			results[i] = new ForceResult { force = totalForce, position = worldCenter, apply = totalForce.sqrMagnitude > 0.001f };
+		}
+
+	}
+	#endregion
+}

@@ -1,0 +1,47 @@
+{
+    "name": "FluidFrenzy",
+    "rootNamespace": "FluidFrenzy",
+    "references": [
+        "GUID:df380645f10b7bc4b97d4f5eb6303d95",
+        "GUID:15fc0a57446b3144c949da3e2b9737a9",
+        "GUID:8990947d903fec847b19d9f51781afb1",
+        "GUID:457756d89b35d2941b3e7b37b4ece6f1",
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:5492a51f516277543a92d676903897bf"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.core",
+            "expression": "15",
+            "define": "FLUIDFRENZY_RPCORE_15_OR_NEWER"
+        },
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "",
+            "define": "FLUIDFRENZY_RUNTIME_URP_SUPPORT"
+        },
+        {
+            "name": "com.unity.modules.vr",
+            "expression": "",
+            "define": "FLUIDFRENZY_RUNTIME_XR_SUPPORT"
+        },
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "17.0.4",
+            "define": "FLUIDFRENZY_RUNTIME_HDRP_SUPPORT"
+        },
+        {
+            "name": "com.unity.burst",
+            "expression": "",
+            "define": "FLUIDFRENZY_RUNTIME_BURST_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
+}

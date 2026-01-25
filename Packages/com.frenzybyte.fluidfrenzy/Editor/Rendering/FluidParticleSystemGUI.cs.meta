@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 86ed8fbaa14dcb8408b44bf93fb0c82b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Editor/Rendering/FluidParticleSystemGUI.cs
+  uploadId: 846442

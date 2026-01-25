@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 407bf31f5c8b7fa4d80769a2985ef5d7
+ShaderIncludeImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Water/URP/WaterLightingURP.hlsl
+  uploadId: 846442

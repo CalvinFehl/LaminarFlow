@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 122119796c845b04a8a3518805a90106
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Scripts/FluxSimulation/FluxFluidSimulation.Resources.cs
+  uploadId: 846442

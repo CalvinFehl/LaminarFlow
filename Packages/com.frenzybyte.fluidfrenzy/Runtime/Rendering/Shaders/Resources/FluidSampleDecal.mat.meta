@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 0cb72d65ad9cc6f4fba3cdbc7ab5608e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Resources/FluidSampleDecal.mat
+  uploadId: 846442

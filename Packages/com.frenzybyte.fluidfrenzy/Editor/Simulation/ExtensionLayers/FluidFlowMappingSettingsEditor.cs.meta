@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 2d43105189ba612498681c36f8db8eb0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Editor/Simulation/ExtensionLayers/FluidFlowMappingSettingsEditor.cs
+  uploadId: 846442

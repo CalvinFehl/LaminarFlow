@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: 61bec24e29bd60e4b85e04098bf2d46e
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Editor/Rendering/Shaders/FluidVolumeGrid.shader
+  uploadId: 846442

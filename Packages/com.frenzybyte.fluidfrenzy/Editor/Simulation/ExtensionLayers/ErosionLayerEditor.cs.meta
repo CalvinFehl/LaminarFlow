@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 7b5b0d7822fe7ac4098fe142d547a6c5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Editor/Simulation/ExtensionLayers/ErosionLayerEditor.cs
+  uploadId: 846442

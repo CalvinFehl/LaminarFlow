@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 4f6707f183ce6824e9027ebf99fd835c
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273366
+  packageName: Fluid Frenzy
+  packageVersion: 1.3.6
+  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/Terraform/FluidErosion.shader
+  uploadId: 846442

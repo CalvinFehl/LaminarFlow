@@ -1,0 +1,33 @@
+{
+    "name": "FluidFrenzyEditor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:df380645f10b7bc4b97d4f5eb6303d95",
+        "GUID:5cdc6c1ecb5b4944587f89d2c5533703",
+        "GUID:de1519aeb840aab478f50f6a339e611f",
+        "GUID:78bd2ddd6e276394a9615c203e574844",
+        "GUID:15fc0a57446b3144c949da3e2b9737a9"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.universal",
+            "expression": "",
+            "define": "FLUIDFRENZY_EDITOR_URP_SUPPORT"
+        },
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "",
+            "define": "FLUIDFRENZY_EDITOR_HDRP_SUPPORT"
+        }
+    ],
+    "noEngineReferences": false
+}
