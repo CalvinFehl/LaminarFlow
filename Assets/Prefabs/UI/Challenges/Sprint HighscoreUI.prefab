@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7270348366145451899
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2152684220856364184}
+  - component: {fileID: 8515140319372259728}
+  - component: {fileID: 4540169469434824903}
+  - component: {fileID: 8459927937568496175}
+  m_Layer: 5
+  m_Name: Sprint HighscoreUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &2152684220856364184
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7270348366145451899}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8515140319372259728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7270348366145451899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: 81019c455869e4c41a7da73faa2e5675, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 4bd6140a6064a2041b9e03f979016f86, type: 3}
+  m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+--- !u!114 &4540169469434824903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7270348366145451899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf2f0f2d7d3a444f8f608de64e71e0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _panelWidth: 1280
+  _panelHeight: 720
+  _panelScale: 1
+  _pixelsPerUnit: 1280
+  _visualTreeAsset: {fileID: 9197481963319205126, guid: 4bd6140a6064a2041b9e03f979016f86, type: 3}
+  _panelSettingsPrefab: {fileID: 11400000, guid: 81019c455869e4c41a7da73faa2e5675, type: 2}
+  _renderTexturePrefab: {fileID: 8600000, guid: 75e355a6911dccc4288dc10cfc08a379, type: 2}
+  UseDragEventFix: 0
+--- !u!114 &8459927937568496175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7270348366145451899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6cc697aee2fdb148be513d23a59d24e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  document: {fileID: 8515140319372259728}
+  ListEntry: {fileID: 9197481963319205126, guid: 0ffcdce56defdcd4b9e69afde5df2fdb, type: 3}

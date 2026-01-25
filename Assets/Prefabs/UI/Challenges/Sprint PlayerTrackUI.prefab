@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &783409831550235148
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7414962618911170275}
+  - component: {fileID: 5220970593735921607}
+  - component: {fileID: 662696246841884282}
+  - component: {fileID: 6813402079262666998}
+  m_Layer: 5
+  m_Name: Sprint PlayerTrackUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7414962618911170275
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 783409831550235148}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5220970593735921607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 783409831550235148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf2f0f2d7d3a444f8f608de64e71e0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _panelWidth: 1280
+  _panelHeight: 720
+  _panelScale: 1
+  _pixelsPerUnit: 1280
+  _visualTreeAsset: {fileID: 9197481963319205126, guid: 1e40660c18181394082d620efa2debeb, type: 3}
+  _panelSettingsPrefab: {fileID: 11400000, guid: 81019c455869e4c41a7da73faa2e5675, type: 2}
+  _renderTexturePrefab: {fileID: 8600000, guid: 75e355a6911dccc4288dc10cfc08a379, type: 2}
+  UseDragEventFix: 0
+--- !u!114 &662696246841884282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 783409831550235148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: 81019c455869e4c41a7da73faa2e5675, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 1e40660c18181394082d620efa2debeb, type: 3}
+  m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+--- !u!114 &6813402079262666998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 783409831550235148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87c9fcdec7cb33549ac2549db44956f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RaceTimeUIDoc: {fileID: 662696246841884282}

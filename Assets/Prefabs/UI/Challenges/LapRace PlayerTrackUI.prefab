@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &281873374021400014
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5243204604339356813}
+  - component: {fileID: 2171992597449551885}
+  - component: {fileID: 3279676134037314112}
+  - component: {fileID: 9095353244113385988}
+  m_Layer: 5
+  m_Name: LapRace PlayerTrackUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &5243204604339356813
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 281873374021400014}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2171992597449551885
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 281873374021400014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bf2f0f2d7d3a444f8f608de64e71e0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _panelWidth: 1280
+  _panelHeight: 720
+  _panelScale: 1
+  _pixelsPerUnit: 1280
+  _visualTreeAsset: {fileID: 9197481963319205126, guid: f4d51defa189ba14a870cf7a43f88d0b, type: 3}
+  _panelSettingsPrefab: {fileID: 11400000, guid: 81019c455869e4c41a7da73faa2e5675, type: 2}
+  _renderTexturePrefab: {fileID: 8600000, guid: 75e355a6911dccc4288dc10cfc08a379, type: 2}
+  UseDragEventFix: 0
+--- !u!114 &3279676134037314112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 281873374021400014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: 81019c455869e4c41a7da73faa2e5675, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: f4d51defa189ba14a870cf7a43f88d0b, type: 3}
+  m_SortingOrder: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+--- !u!114 &9095353244113385988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 281873374021400014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ec09c6181dbd6245a3f57078b91bbed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  RaceTimeUIDoc: {fileID: 3279676134037314112}
+  PlayerLapRaceInfo:
+    Player: {fileID: 0}
+    CurrentCheckPoint: {fileID: 0}
+    NextTargetCheckpoint: {fileID: 0}
+    ChallengeTime: 0
+    ChallengeCompleted: 0
+    ChallengeStarted: 0
+    lapAlmostCompleted: 0
+    lapCount: 0
+    lapsCompleted: 0

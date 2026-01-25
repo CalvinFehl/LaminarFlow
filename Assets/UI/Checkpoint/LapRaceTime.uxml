@@ -1,0 +1,17 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); align-items: center;">
+        <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
+            <ui:Label tabindex="-1" text="Total Time:" display-tooltip-when-elided="true" name="TotalTimeLabel" style="font-size: 60px;" />
+            <ui:Label tabindex="-1" text="0" display-tooltip-when-elided="true" name="TotalTimeValueLabel" style="font-size: 60px;" />
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 0; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
+            <ui:Label tabindex="-1" text="Checkpoint Time:" display-tooltip-when-elided="true" name="CheckpointTimeLabel" style="font-size: 60px;" />
+            <ui:Label tabindex="-1" text="0" display-tooltip-when-elided="true" name="CheckpointTimeValueLabel" style="font-size: 60px;" />
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
+            <ui:Label tabindex="-1" text="Label" display-tooltip-when-elided="true" name="CurrentLapValueLabel" style="font-size: 60px;" />
+            <ui:Label tabindex="-1" text="/" display-tooltip-when-elided="true" name="Dash" style="font-size: 60px;" />
+            <ui:Label tabindex="-1" text="Label" display-tooltip-when-elided="true" name="LapCountValueLabel" style="font-size: 60px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
