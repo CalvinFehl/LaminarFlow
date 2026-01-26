@@ -62,48 +62,115 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\ECM2\Examples\Glide\Scripts\GlideAbility.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Sensors, PD, Computer\LocationAsLocalMovementInterpreter.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\FlowControllerNetworkAdapter.cs" />
+    <Compile Include="Assets\Scripts\Board\Animation\LookAtByTrajectory.cs" />
+    <Compile Include="Assets\Scripts\Scene\CameraManager01Knot.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IReconsileVector2.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\InputReader.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Thruster\SimpleMagnet.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\6 - Physics\6.1 - Forces\Scripts\Bouncer.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IReconsileString.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\4 - Extending a Character\4.2 - Character Extensions\Scripts\SprintAbility.cs" />
     <Compile Include="Assets\ECM2\Examples\Orient to Ground\Scripts\CharacterOrientToGround.cs" />
     <Compile Include="Assets\ECM2\Examples\Third Person\Scripts\ThirdPersonController.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\SwitchDualInput.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\8 - AI Navigation\8.1 - Click To Move\Scripts\ClickToMove.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IReconsileQuaternion.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IReconsileVector3.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Old\SimpleRigidbodyTracker.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\FlowController.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Sensors, PD, Computer\GroundNormalBounceRayCastSensor.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Structs\GroundData.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Effects\Sound\BoolSingleSound.cs" />
     <Compile Include="Assets\ECM2\Examples\Jump\Scripts\JumpAbility.cs" />
     <Compile Include="Assets\ECM2\Examples\Slide\Scripts\PlayerCharacter.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IHandleInput.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Effects\Sound\PitchableDoubleSourceSound.cs" />
+    <Compile Include="Assets\Scripts\Board\Animation\SimpleReversePendulumAnimationSystem.cs" />
     <Compile Include="Assets\ECM2\Examples\Toggle Gravity Direction\Scripts\ToggleCharacterGravityDirection.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Thruster\SimpleJump.cs" />
     <Compile Include="Assets\ECM2\Examples\Planet Walk\Scripts\PlayerCharacter.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Old\Vector2InputReceiver.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Outside Physics\SimpleGravity.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Old\BoolInputReceiver.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Battery, Charging, Tricks\SimpleBattery.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\4 - Extending a Character\4.3 - Custom Movement Mode\Scripts\DashingCharacter.cs" />
     <Compile Include="Assets\ECM2\Examples\Planet Walk\Scripts\ThirdPersonController.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Old\IndividualButtonActionGamepadInputProcessor.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Sensors, PD, Computer\PDRotationController.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\3 - Animating a Character\3.1 - Animation Controller\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Thruster\AimedChargedDash.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Sensors, PD, Computer\SinglePDModule.cs" />
+    <Compile Include="Assets\Scripts\Sounds\SmallHedge SoundManager\PlaySoundExit.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\2 - Controlling a Character\2.2 - Character Controller\Scripts\PlayerController.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Effects\Sound\FloatFlexibleSound.cs" />
     <Compile Include="Assets\ECM2\Shared Assets\Scripts\SimpleCameraController.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Sensors, PD, Computer\LocationAsWorldMovementInterpreter.cs" />
+    <Compile Include="Assets\Scripts\Sounds\SmallHedge SoundManager\SoundsSOEditor.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IReconsileBool.cs" />
     <Compile Include="Assets\ECM2\Examples\First Person\Scripts\FirstPersonCharacterLookInput.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\6 - Physics\6.2 - Physics Interactions\Scripts\ApplyLandingForce.cs" />
     <Compile Include="Assets\ECM2\Examples\Ladders\Scripts\CharacterInput.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\7 - Platforms\7.4 - One-Way Platforms\Scripts\OneWayPlatform.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Effects\Sound\PitchableSingleSourceSound.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Structs\GamepadInput.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Old\FloatInputReceiver.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\GamepadInputReader.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Sensors, PD, Computer\PDController.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Thruster\SimpleThruster.cs" />
+    <Compile Include="Assets\Scripts\Board\Animation\SimpleCharacterOnBoardMovement.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IHandleGroundData.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IReferenceRigidbody.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Sensors, PD, Computer\SingleRayCastSensor.cs" />
     <Compile Include="Assets\ECM2\Examples\Jump\Scripts\CharacterInput.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\7 - Platforms\7.1 - Scripted Platforms\Scripts\KinematicRotate.cs" />
     <Compile Include="Assets\ECM2\Examples\Slope Speed Modifier\Scripts\MyCharacter.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Thruster\SimplePDStabilizer.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\5 - Collision Detection and Events\5.1 - Custom Character\Scripts\PlayerCharacter.cs" />
     <Compile Include="Assets\ECM2\Shared Assets\Scripts\CharacterPause.cs" />
     <Compile Include="Assets\ECM2\Examples\First Person Swim\Scripts\CharacterInput.cs" />
+    <Compile Include="Assets\Scripts\Sounds\SmallHedge SoundManager\SoundsSO.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Old\BaseReceiver.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IAccessibleSinglePDController.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\ISimulateable.cs" />
+    <Compile Include="Assets\Scripts\Sounds\SmallHedge SoundManager\SoundManager.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Thruster\PDThruster.cs" />
     <Compile Include="Assets\TutorialInfo\Scripts\Readme.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Old\BaseGamepadInputProcessor.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Sensors, PD, Computer\BaseFSensor.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Old\InputAdapter.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\7 - Platforms\7.1 - Scripted Platforms\Scripts\KinematicMove.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\4 - Extending a Character\4.1 - Custom Character\Scripts\SprintableCharacter.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\4 - Extending a Character\4.3 - Custom Movement Mode\Scripts\PlayerController.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\3 - Animating a Character\3.1 - Animation Controller\Scripts\AnimationController.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IAccessibleTriplePDController.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\ISetTick.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IReconsileFloat.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\6 - Physics\6.1 - Forces\Scripts\ForceZone.cs" />
     <Compile Include="Assets\ECM2\Examples\First Person\Scripts\FirstPersonCharacterInput.cs" />
     <Compile Include="Assets\ECM2\Examples\Twin-Stick Movement\Scripts\TwinStickCharacter.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Structs\RigidbodyData.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Outside Physics\SimpleAdaptiveAerodynamics.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\IReposition.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Sensors, PD, Computer\GetGamepadParameter.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\5 - Collision Detection and Events\5.2 - Listen Character Events\Scripts\PlayerController.cs" />
     <Compile Include="Assets\ECM2\Examples\Side Scrolling\Scripts\SideScrollingCharacter.cs" />
     <Compile Include="Assets\ECM2\Examples\Ladders\Scripts\LadderClimbAbility.cs" />
+    <Compile Include="Assets\Scripts\Sounds\SmallHedge SoundManager\SoundValues.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Battery, Charging, Tricks\TrickRaterToSimpleBattery.cs" />
     <Compile Include="Assets\ECM2\Examples\First Person Fly\Scripts\FlyAbility.cs" />
     <Compile Include="Assets\ECM2\Examples\First Person\Scripts\FirstPersonCharacter.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Sensors, PD, Computer\RotationAsPitchYawRollInterpreter.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Old\BaseInteractiveModule.cs" />
     <Compile Include="Assets\ECM2\Examples\Glide\Scripts\PlayerController.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\3 - Animating a Character\3.3 - Root Motion Toggle\Scripts\RootMotionToggle.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Interfaces\IHandleRigidbodyData.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\4 - Extending a Character\4.2 - Character Extensions\Scripts\PlayerController.cs" />
     <Compile Include="Assets\ECM2\Examples\Teleport\Scripts\Teleporter.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\2 - Controlling a Character\2.1 - Custom Character\Scripts\PlayerCharacter.cs" />
+    <Compile Include="Assets\Scripts\Board\FlowController\Modules\Thruster\SimpleRotater.cs" />
+    <Compile Include="Assets\Scripts\Sounds\SmallHedge SoundManager\PlaySoundEnter.cs" />
     <Compile Include="Assets\ECM2\Walkthrough\7 - Platforms\Shared Scripts\PlayerController.cs" />
     <Compile Include="Assets\ECM2\Examples\Ladders\Scripts\Ladder.cs" />
     <Compile Include="Assets\ECM2\Examples\First Person Fly\Scripts\CharacterInput.cs" />
@@ -163,6 +230,7 @@
     <None Include="Assets\Obi\Resources\Compute\HeightfieldShape.compute" />
     <None Include="Assets\Obi\Resources\Compute\AtomicDeltas.cginc" />
     <None Include="Assets\Obi\Resources\Compute\ChainConstraints.compute" />
+    <None Include="Assets\Scripts\Sounds\SmallHedge SoundManager\readme.txt" />
     <None Include="Assets\Obi\Resources\Compute\QueryDefinitions.cginc" />
     <None Include="Assets\Obi\Resources\Compute\SphereShapeQuery.compute" />
     <None Include="Assets\Obi\Resources\Compute\SkinConstraints.compute" />
@@ -1295,6 +1363,10 @@
       <HintPath>Library\ScriptAssemblies\PPv2URPConverters.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.Animation.Rigging.Editor">
+      <HintPath>Library\ScriptAssemblies\Unity.Animation.Rigging.Editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Runtime.Shared">
       <HintPath>Library\ScriptAssemblies\Unity.RenderPipelines.Core.Runtime.Shared.dll</HintPath>
       <Private>False</Private>
@@ -1341,6 +1413,10 @@
     </Reference>
     <Reference Include="Unity.Cinemachine">
       <HintPath>Library\ScriptAssemblies\Unity.Cinemachine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Animation.Rigging">
+      <HintPath>Library\ScriptAssemblies\Unity.Animation.Rigging.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Rider.Editor">
