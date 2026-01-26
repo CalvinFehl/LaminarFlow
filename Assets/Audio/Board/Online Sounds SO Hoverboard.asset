@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c40da30aec159d54094f6f313d683a3f, type: 3}
+  m_Name: Online Sounds SO Hoverboard
+  m_EditorClassIdentifier: 
+  sounds:
+  - name: HoverEngage
+    volume: 1
+    mixer: {fileID: 0}
+    sounds: []
+  - name: HoverThrust
+    volume: 1
+    mixer: {fileID: -7113994792476916680, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds: []
+  - name: RocketEngage
+    volume: 1
+    mixer: {fileID: -469411685014094236, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 8300000, guid: a2ddb27fa46016f459eb0f4549a7445f, type: 3}
+  - name: RocketThrust
+    volume: 1
+    mixer: {fileID: 0}
+    sounds: []
+  - name: GrappleShoot
+    volume: 1
+    mixer: {fileID: -8764044683886111881, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 8300000, guid: 8c8d97b93b42c6e4a9fb163872ea99b4, type: 3}
+  - name: GrappleHit
+    volume: 1
+    mixer: {fileID: -8764044683886111881, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 8300000, guid: 29b0e215e2fa4f4499b3308c44554d79, type: 3}
+  - name: GrappleTighten
+    volume: 1
+    mixer: {fileID: -8764044683886111881, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 8300000, guid: e2cb608c24dbf334b840bed31d295399, type: 3}
+  - name: GrappleHold
+    volume: 1
+    mixer: {fileID: -8764044683886111881, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 0}
+  - name: GrappleRelease
+    volume: 1
+    mixer: {fileID: -8764044683886111881, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 8300000, guid: e2cb608c24dbf334b840bed31d295399, type: 3}
+  - name: MagnetEngage
+    volume: 1
+    mixer: {fileID: -8427585221969761054, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 8300000, guid: 8dc69e0db9bf20c4a80e825da977e163, type: 3}
+  - name: MagnetHold
+    volume: 0.2
+    mixer: {fileID: -8427585221969761054, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 8300000, guid: 8eea23b90be9a8c469a55c0fecfe7e5f, type: 3}
+  - name: MagnetRelease
+    volume: 1
+    mixer: {fileID: -8427585221969761054, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 8300000, guid: 60d823fe436c01b4386034f08c27fac4, type: 3}
+  - name: Jump
+    volume: 0.2
+    mixer: {fileID: -3627180465563077853, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 8300000, guid: 5dbea7d0d8004824586e1844ccd7e56d, type: 3}
+  - name: Dash
+    volume: 0.2
+    mixer: {fileID: -3627180465563077853, guid: 57445cea2e40bde42a9f04f1de2bbfe5, type: 2}
+    sounds:
+    - {fileID: 8300000, guid: 7c228637ca49e2045a986b818ecebf03, type: 3}
+  - name: DashCharge
+    volume: 1
+    mixer: {fileID: 0}
+    sounds: []
+  - name: BatteryCharge
+    volume: 1
+    mixer: {fileID: 0}
+    sounds: []
