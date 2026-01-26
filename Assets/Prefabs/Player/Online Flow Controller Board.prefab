@@ -9331,6 +9331,34 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4560900746206961585}
     m_Modifications:
+    - target: {fileID: 1941676182117069256, guid: 6b86fada02090c54aac59a62a16bdf96, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2734285217111175824, guid: 6b86fada02090c54aac59a62a16bdf96, type: 3}
+      propertyPath: Target.TrackingTarget
+      value: 
+      objectReference: {fileID: 8296799938240358563}
+    - target: {fileID: 5710111930765795157, guid: 6b86fada02090c54aac59a62a16bdf96, type: 3}
+      propertyPath: Target.TrackingTarget
+      value: 
+      objectReference: {fileID: 435906577498552477}
+    - target: {fileID: 8043526155304972694, guid: 6b86fada02090c54aac59a62a16bdf96, type: 3}
+      propertyPath: field of view
+      value: 34.088768
+      objectReference: {fileID: 0}
+    - target: {fileID: 8368449336159151968, guid: 6b86fada02090c54aac59a62a16bdf96, type: 3}
+      propertyPath: Target.TrackingTarget
+      value: 
+      objectReference: {fileID: 435906577498552477}
+    - target: {fileID: 9058932359792519425, guid: 6b86fada02090c54aac59a62a16bdf96, type: 3}
+      propertyPath: Target.LookAtTarget
+      value: 
+      objectReference: {fileID: 435906577498552477}
+    - target: {fileID: 9102159391781029462, guid: 6b86fada02090c54aac59a62a16bdf96, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 435906577498552477}
     - target: {fileID: 2734285217111175824, guid: a0e59028003b5c24d8442f48286ce1f4, type: 3}
       propertyPath: Target.TrackingTarget
       value: 

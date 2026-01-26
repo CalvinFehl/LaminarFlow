@@ -323,18 +323,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09fbacc2f3ea17d48a3c11d485f130bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  followCamera: {fileID: 0}
-  aimCamera: {fileID: 0}
-  closeupCamera: {fileID: 0}
-  spawnCamera: {fileID: 0}
+  followCamera: {fileID: 8368449336159151968}
+  aimCamera: {fileID: 5710111930765795157}
+  closeupCamera: {fileID: 9058932359792519425}
+  spawnCamera: {fileID: 2734285217111175824}
   distanceThreshold: 4
   distanceUncertaintyTime: 0.3
   spawnCameraDuration: 0.2
   cameras:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 8368449336159151968}
+  - {fileID: 5710111930765795157}
+  - {fileID: 9058932359792519425}
+  - {fileID: 2734285217111175824}
   activeCameraName: 
   player: {fileID: 0}
   closeUpCameraPivot: {fileID: 2294799433299608293}
@@ -353,6 +353,7 @@ GameObject:
   - component: {fileID: 3098766038956808743}
   - component: {fileID: 3786113978783764496}
   - component: {fileID: 4919063713947247791}
+  - component: {fileID: 5663257283137791859}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -408,7 +409,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 80
+  field of view: 34.088737
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
@@ -482,6 +483,50 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_MaxRayIntersections: 0
+--- !u!114 &5663257283137791859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5466444662424567909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalCameraData
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
+  m_Version: 2
 --- !u!1 &7411789438166913445
 GameObject:
   m_ObjectHideFlags: 0
