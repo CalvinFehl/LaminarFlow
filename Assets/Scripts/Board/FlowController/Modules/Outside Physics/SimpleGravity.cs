@@ -38,6 +38,6 @@ public class SimpleGravity : BaseInteractiveModule, IReferenceRigidbody, IHandle
     public void Simulate(float deltaTime)
     {
         if (!IsOn) return;
-        PhysicsRigidbody.AddForce(gravityVector * deltaTime, ForceMode.Impulse);
+        PhysicsRigidbody.AddForce(gravityVector, ForceMode.Acceleration);
     }
 }

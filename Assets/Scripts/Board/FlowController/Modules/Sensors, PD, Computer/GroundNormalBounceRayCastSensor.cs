@@ -5,6 +5,7 @@ public class GroundNormalBounceRayCastSensor : BaseFSensor
     [Tooltip("The raycast shoots in the Transform Y Direction")]
     [SerializeField] private Transform raycastOrigin;
     [SerializeField] private float maxDistance = 10f;
+    [SerializeField] private bool usesSimpleRay = false;
 
     /// <summary>
     /// args[0] = maxDistance
@@ -27,6 +28,11 @@ public class GroundNormalBounceRayCastSensor : BaseFSensor
                 HitDistance = rayhit.distance,
                 HitTag = rayhit.collider.tag
             };
+
+            if (usesSimpleRay)
+            {
+                return groundData;
+            }
 
             if (Physics.Raycast(raycastOrigin.position, -rayhit.normal, out RaycastHit rayhit2, _maxDistance * 2f))
             {
