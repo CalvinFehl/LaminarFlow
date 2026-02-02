@@ -1,6 +1,5 @@
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Splines.Interpolators;
 
 public class SimpleBoardCameraManager : MonoBehaviour, IHandleInput, IHandleRigidbodyData
 {
@@ -63,8 +62,12 @@ public class SimpleBoardCameraManager : MonoBehaviour, IHandleInput, IHandleRigi
         }
     }
 
-
     private void LateUpdate()
+    {
+        HandleFollowCamOffset();
+    }
+
+    private void HandleFollowCamOffset()
     {
         // Handle Orbiting Movement
         if (Mathf.Abs(orbitMovement) > 0.1f)
@@ -93,14 +96,12 @@ public class SimpleBoardCameraManager : MonoBehaviour, IHandleInput, IHandleRigi
             if (currentMaxAngle > whileRidingMaxAngle + 0.1f)
             {
                 currentMaxAngle = Mathf.MoveTowards(currentMaxAngle, whileRidingMaxAngle, Time.deltaTime * orbitReturnSpeed * 360f);
-                Debug.Log("Current Max Angle: " + currentMaxAngle);     
             }
             orbitAngle = orbitAngle > 180 ? Mathf.Clamp(orbitAngle, 360f - currentMaxAngle, 360f) : Mathf.Clamp(orbitAngle, 0f, currentMaxAngle);
         }
 
         float radians = orbitAngle * Mathf.Deg2Rad;
-        orbitPosition = new Vector2(Mathf.Sin(radians), 1 - Mathf.Cos(radians)) * orbitRadius;
-   
+        orbitPosition = new Vector2(Mathf.Sin(radians), 1 - Mathf.Cos(radians)) * orbitRadius;   
 
         var offset = followCamera.GetComponent<CinemachineCameraOffset>();
         if (offset != null)
