@@ -15,7 +15,6 @@ public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput
 
 
     [Header("Settings")]
-
     [SerializeField] bool usesAuxiliaryHoldButton = false;
 
     [Tooltip("1 = Left Shoulder, 2 = Right Shoulder, 3 = Left Stick Button, 4 = Right Stick Button\r\n " +

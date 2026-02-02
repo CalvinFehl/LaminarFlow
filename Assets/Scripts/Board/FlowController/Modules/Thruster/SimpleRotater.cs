@@ -15,8 +15,7 @@ public class SimpleRotater : BaseInteractiveModule, IReferenceRigidbody, IHandle
     [SerializeField] private float rollSpeed = 0f;
 
     [Tooltip("1 -> left.x, 2 -> left.y, 3 -> right.x, 4 -> right.y")]
-    [SerializeField] private int PitchStickAxis = 2,
-        YawStickAxis = 3, RollStickAxis = 1;
+    [SerializeField] private int PitchStickAxis = 2, YawStickAxis = 3, RollStickAxis = 1;
 
 
     public void HandleInput(in GamepadInput input, float deltaTime)
