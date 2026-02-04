@@ -8,6 +8,13 @@ public class SimpleBoardCameraManager : MonoBehaviour, IHandleInput, IHandleRigi
     [SerializeField] private CinemachineCamera aimCamera;
     [SerializeField] private GetGamepadParameter inputLogic = new GetGamepadParameter();
 
+    [Header("Runtime Variables")]
+    [SerializeField] bool canOrbit360 = false;
+    [SerializeField] float orbitAngle = 0f;
+    private float orbitMovement = 0f;
+    private Vector2 orbitPosition = Vector2.zero;
+    [SerializeField] CameraMode currentCameraMode = CameraMode.Follow;
+
     [Header("Settings")]
     [Tooltip("1 = Left Stick X, 2 = Left Stick Y, 3 = Right Stick X, 4 = Right Stick Y")]
     [SerializeField] int inputAxis = 3;
@@ -22,13 +29,6 @@ public class SimpleBoardCameraManager : MonoBehaviour, IHandleInput, IHandleRigi
     [SerializeField] private float standingTimeTreshold = 2f;
     private float standingTime = 0f;
     private float currentMaxAngle = 360f;
-
-    [Header("Runtime Variables")]
-    [SerializeField] bool canOrbit360 = false;
-    [SerializeField] float orbitAngle = 0f;
-    private float orbitMovement = 0f;
-    private Vector2 orbitPosition = Vector2.zero;
-    [SerializeField] CameraMode currentCameraMode = CameraMode.Follow;
 
     public enum CameraMode
     {

@@ -1,5 +1,3 @@
-using ECM2.Examples;
-using System;
 using UnityEngine;
 
 public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput, ISimulateable
