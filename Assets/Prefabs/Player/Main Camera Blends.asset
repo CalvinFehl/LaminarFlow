@@ -12,46 +12,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36baaa8bdcb9d8b49b9199833965d2c3, type: 3}
   m_Name: Main Camera Blends
   m_EditorClassIdentifier: 
-  m_CustomBlends:
-  - m_From: 1 Follow
-    m_To: 2 Aim
-    m_Blend:
-      m_Style: 1
-      m_Time: 1
-      m_CustomCurve:
+  CustomBlends:
+  - From: 1 Follow
+    To: 2 Aim
+    Blend:
+      Style: 1
+      Time: 1
+      CustomCurve:
         serializedVersion: 2
         m_Curve: []
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-  - m_From: 2 Aim
-    m_To: 1 Follow
-    m_Blend:
-      m_Style: 1
-      m_Time: 0.6
-      m_CustomCurve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 0
-        m_PostInfinity: 0
-        m_RotationOrder: 0
-  - m_From: '**ANY CAMERA**'
-    m_To: 3 Close
-    m_Blend:
-      m_Style: 1
-      m_Time: 0.6
-      m_CustomCurve:
-        serializedVersion: 2
-        m_Curve: []
-        m_PreInfinity: 0
-        m_PostInfinity: 0
-        m_RotationOrder: 0
-  - m_From: 3 Close
-    m_To: 1 Follow
-    m_Blend:
-      m_Style: 1
-      m_Time: 1
-      m_CustomCurve:
+  - From: 2 Aim
+    To: 1 Follow
+    Blend:
+      Style: 1
+      Time: 0.6
+      CustomCurve:
         serializedVersion: 2
         m_Curve: []
         m_PreInfinity: 0
