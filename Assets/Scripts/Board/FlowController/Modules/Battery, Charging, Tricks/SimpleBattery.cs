@@ -104,9 +104,8 @@ public class SimpleBattery : MonoBehaviour, ISimulateable, IReconsileFloat, ISet
 
     public float UseEnergy(float requestedEnergy)
     {
-        float availableEnergy = Mathf.Min(requestedEnergy, currentEnergy);
         currentEnergy = Mathf.Clamp(currentEnergy - requestedEnergy, 0f, maxEnergy * maxOverchargeFactor);
-        return availableEnergy;
+        return currentEnergy;
     }
 
     public float GetCurrentEnergy()

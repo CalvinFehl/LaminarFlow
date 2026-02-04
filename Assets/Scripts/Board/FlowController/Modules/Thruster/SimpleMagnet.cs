@@ -1,15 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IHandleGroundData, ISimulateable, IReconsileBool, ISetTick
+public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IHandleGroundData, ISimulateable
 {
-    public struct MagnetOnData
-    {
-        public bool IsEngaged;
-        public uint Tick;
-    }
-
-
+    [Header("Components")]
     public Rigidbody PhysicsRigidbody { get; set; }
     [SerializeField] private GetGamepadParameter inputLogic = new GetGamepadParameter();
     [SerializeField] private SimpleBattery battery;
@@ -36,7 +30,6 @@ public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IH
     [SerializeField] float stopMagnetTresholdEnergy = 0.9f;
 
 
-
     [Header("PD Boost Settings")]
 
     [SerializeField] private float pFactorBoost = 1f;
@@ -51,8 +44,6 @@ public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IH
     [SerializeField] private ParticleSystem thrusterEffect = null;
     [SerializeField] private FloatFlexibleSound soundSystem = null;
 
-    private uint lastReconsiledTick = 0;
-
     private bool magnetismShouldBeEngaged = false;
     private bool wasPressed = false;
 
@@ -65,7 +56,6 @@ public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IH
         {
             if (!wasPressed) // On Button Down
             {
-                Debug.Log("Magnet Button Down");
                 if (magnetismEngaged)
                 {
                     magnetismShouldBeEngaged = false;
@@ -78,11 +68,6 @@ public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IH
         }
         
         wasPressed = buttonPressed;
-
-        //if (magnetismShouldBeEngaged != magnetismEngaged)
-        //{
-        //    Debug.Log($"Magnetism Engaged: {magnetismEngaged}, Should be Engaged: {magnetismShouldBeEngaged}, Button Pressed: {buttonPressed}, lastTick: ");            
-        //}
     }
 
     // IHandleGroundData Method
@@ -121,12 +106,6 @@ public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IH
             }
         }
 
-        bool debugOutput = false;
-        if (magnetismShouldBeEngaged != magnetismEngaged)
-        {
-            debugOutput = true;
-        }
-
 
         if (magnetismShouldBeEngaged)
         {
@@ -149,59 +128,11 @@ public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IH
             }
         }
 
-        //if (debugOutput)
-        //{
-        //    Debug.Log($"Magnetism Engaged: {magnetismEngaged}, Should be Engaged: {magnetismShouldBeEngaged}");
-        //}
-
-
         if (magnetismEngaged)
         {
             PhysicsRigidbody.AddForce(magnetVector * deltaTime, ForceMode.Impulse);
         }
     }
-
-    // ISetTick Method
-    public void SetTick(uint tick)
-    {
-        if (tick <= lastReconsiledTick)
-        {
-            return;
-        }
-        lastReconsiledTick = tick;
-        //Debug.Log($"SetTick Magnetism: {magnetismEngaged}, Tick: {tick}");
-    }
-
-    // IReconsileBool Method
-    public bool GetValue()
-    {
-        //Debug.Log($"GetValue Magnetism: {magnetismEngaged}, lastreconsile: {lastReconsiledTick}");
-
-        return magnetismEngaged;
-    }
-
-    public void Reconcile(bool isEngaged, uint tick)
-    {
-        //Debug.Log($"Reconcile Magnetism: {isEngaged}, Tick: {tick}");
-        if (tick <= lastReconsiledTick)
-        {
-            return;
-        }
-
-        //Debug.Log($"actually reconsiling!! Magnetism: {isEngaged}");
-
-        lastReconsiledTick = tick;
-        //if (magnetismEngaged == isEngaged)
-        //{
-        //    return; // no change
-        //}
-
-        magnetismEngaged = isEngaged;
-        magnetismShouldBeEngaged = isEngaged;
-        BoostDuringMagnetState(isEngaged);
-        soundSystem?.HandleSound(isEngaged ? 1f : 0f, 0f);
-    }
-
 
     public void BoostDuringMagnetState(bool engagesMagnetism)
     {
@@ -210,11 +141,11 @@ public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IH
             // Boost PD values (when engagesMagnetism is true) -> x * factor
             // or reset them (when engagesMagnetism is false) -> x / factor
 
-            Vector3 _pFactorsBoost = engagesMagnetism? pFactorsBoost : new Vector3(Invert(pFactorsBoost.x), Invert(pFactorsBoost.y), Invert(pFactorsBoost.z));
+            Vector3 _pFactorsBoost = engagesMagnetism ? pFactorsBoost : new Vector3(Invert(pFactorsBoost.x), Invert(pFactorsBoost.y), Invert(pFactorsBoost.z));
             Vector3 _dFactorsBoost = engagesMagnetism ? dFactorsBoost : new Vector3(Invert(dFactorsBoost.x), Invert(dFactorsBoost.y), Invert(dFactorsBoost.z));
 
             boostableObject.GetComponent<IAccessibleSinglePDController>()?.BoostPDValues(
-                engagesMagnetism? pFactorBoost : Invert(pFactorBoost), 
+                engagesMagnetism ? pFactorBoost : Invert(pFactorBoost), 
                 engagesMagnetism ? dFactorBoost : Invert(dFactorBoost));
             boostableObject.GetComponent<IAccessibleTriplePDController>()?.BoostPDValues(_pFactorsBoost, _dFactorsBoost);
 

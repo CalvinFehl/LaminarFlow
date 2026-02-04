@@ -231,11 +231,11 @@ MonoBehaviour:
   magnetismEngaged: 0
   magnetVector: {x: 0, y: 0, z: 0}
   activationButton: 1
-  heightTreshold: 1.5
-  magnetStrength: 100
-  energyConsumptionPerSecond: 0.0001
+  heightTreshold: 3
+  magnetStrength: 200
+  energyConsumptionPerSecond: 0.1
   minimumEnergyForStartMagnet: 0.2
-  stopMagnetTresholdEnergy: 0.001
+  stopMagnetTresholdEnergy: 1
   pFactorBoost: 2.5
   dFactorBoost: 3
   pFactorsBoost: {x: 1, y: 1, z: 1}
