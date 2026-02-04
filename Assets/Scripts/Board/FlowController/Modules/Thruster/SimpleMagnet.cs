@@ -92,7 +92,8 @@ public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IH
         {
             if (magnetismEngaged)
             {
-                if (battery.UseEnergy(energyConsumptionPerSecond * deltaTime) < stopMagnetTresholdEnergy)  // Use Energy from Battery
+                battery.UseEnergy(energyConsumptionPerSecond * deltaTime);
+                if (battery.GetCurrentEnergy() < stopMagnetTresholdEnergy)  // Use Energy from Battery
                 {
                     magnetismShouldBeEngaged = false;
                 }

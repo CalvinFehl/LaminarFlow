@@ -27,7 +27,7 @@ public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput
     [SerializeField] float maxButtonPressedTime = 2f;
     [SerializeField] float coolDown = 0.5f;
     [SerializeField] float energyConsumption = 1f;
-    [SerializeField] float dashMaxStrength = 15f;
+    [SerializeField] float dashStrength = 15f;
     [SerializeField] float heightTreshold = 1f;
 
 
@@ -101,7 +101,7 @@ public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput
                     // an available Energy of 1 translates to a dash with 1 dashMaxStrength
                     float availableEnergy = battery ? battery.UseEnergy(energyConsumption * buttonPressedAmount) / energyConsumption : 1f;
 
-                    PhysicsRigidbody.AddForceAtPosition(referenceTransform.up * dashMaxStrength * availableEnergy, referenceTransform.position);
+                    PhysicsRigidbody.AddForceAtPosition(referenceTransform.up * dashStrength * availableEnergy, referenceTransform.position);
 
                     // Handle Sound
                     if (soundSystem != null)
@@ -154,7 +154,7 @@ public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput
                     // an available Energy of 1 translates to a dash with 1 dashMaxStrength
                     float availableEnergy = battery ? battery.UseEnergy(energyConsumption * buttonPressedAmount) / energyConsumption : 1f;
 
-                    PhysicsRigidbody.AddForceAtPosition(referenceTransform.up * dashMaxStrength * availableEnergy, referenceTransform.position);
+                    PhysicsRigidbody.AddForceAtPosition(referenceTransform.up * dashStrength * availableEnergy, referenceTransform.position);
 
                     if (soundSystem != null)
                     {

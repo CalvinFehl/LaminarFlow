@@ -1334,8 +1334,8 @@ MonoBehaviour:
   buttonPressedTime: 0
   maxButtonPressedTime: 1.5
   coolDown: 0.3
-  energyConsumption: 2
-  dashMaxStrength: 30000
+  energyConsumption: 1
+  dashStrength: 24000
   heightTreshold: 1
   cameraSwitchTreshold: 0.3
   cameraManager: {fileID: 1268745627257449365}
@@ -2948,9 +2948,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05f6a3d9cf1f60848bd40462a344118c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioSource: {fileID: 4144890291282006028}
+  audioSource: {fileID: 0}
   soundName: Jump
-  volume: 0.2
+  volume: 0.35
 --- !u!1 &3423344350180882277
 GameObject:
   m_ObjectHideFlags: 0
