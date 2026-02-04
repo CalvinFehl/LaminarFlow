@@ -4,8 +4,8 @@ using UnityEngine;
 public class SimpleBoardCameraManager : MonoBehaviour, IHandleInput, IHandleRigidbodyData
 {
     [Header("Components")]
-    [SerializeField] private CinemachineCamera followCamera;
-    [SerializeField] private CinemachineCamera aimCamera;
+    [SerializeField] public CinemachineCamera followCamera;
+    [SerializeField] public CinemachineCamera aimCamera;
     [SerializeField] private GetGamepadParameter inputLogic = new GetGamepadParameter();
 
     [Header("Runtime Variables")]

@@ -54,7 +54,7 @@ public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput
             referenceTransform = transform;
         }
 
-        if (cameraManager != null)
+        if (cameraManager == null)
         {
             cameraManager = GetComponentInParent<SimpleBoardCameraManager>();
         }
