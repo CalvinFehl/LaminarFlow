@@ -56,7 +56,7 @@ public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput
 
         if (cameraManager != null)
         {
-            cameraManager = FindFirstObjectByType<SimpleBoardCameraManager>();
+            cameraManager = GetComponentInParent<SimpleBoardCameraManager>();
         }
 
         timeSinceDash = coolDown;
