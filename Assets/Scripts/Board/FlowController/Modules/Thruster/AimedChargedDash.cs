@@ -1,4 +1,5 @@
-    using System;
+using ECM2.Examples;
+using System;
 using UnityEngine;
 
 public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput, ISimulateable
@@ -34,7 +35,7 @@ public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput
 
     [Header("Camera Settings")]
     [SerializeField] float cameraSwitchTreshold = 0.5f;
-    public event Action<string> OnAimingCameraUpdated;
+    [SerializeField] private SimpleBoardCameraManager cameraManager;
 
 
     [Header("Effects")]
@@ -53,6 +54,11 @@ public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput
         if (referenceTransform == null)
         {
             referenceTransform = transform;
+        }
+
+        if (cameraManager != null)
+        {
+            cameraManager = FindFirstObjectByType<SimpleBoardCameraManager>();
         }
 
         timeSinceDash = coolDown;
@@ -160,9 +166,9 @@ public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput
                     buttonPressedTime = 0f;
                     timeSinceDash = 0f;
 
-                    if (switchedCamera)
+                    if (switchedCamera && cameraManager != null)
                     {
-                        OnAimingCameraUpdated?.Invoke("Follow");
+                        cameraManager?.SwitchCameraMode(SimpleBoardCameraManager.CameraMode.Follow);
                         switchedCamera = false;
                     }
                 }
@@ -187,9 +193,9 @@ public class AimedChargedDash : MonoBehaviour, IReferenceRigidbody, IHandleInput
                     buttonPressedTime = maxButtonPressedTime;
                 }
 
-                if (buttonPressedTime > cameraSwitchTreshold && !switchedCamera && auxiliaryButtonPressed)
+                if (buttonPressedTime > cameraSwitchTreshold && !switchedCamera && auxiliaryButtonPressed && cameraManager != null)
                 {
-                    OnAimingCameraUpdated?.Invoke("Aim");
+                    cameraManager?.SwitchCameraMode(SimpleBoardCameraManager.CameraMode.Aim);
                     switchedCamera = true;
                 }
             }

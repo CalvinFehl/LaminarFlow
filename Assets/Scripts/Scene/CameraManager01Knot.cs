@@ -23,13 +23,13 @@ public class CameraManager01Knot : MonoBehaviour
     private void OnEnable()
     {
         AimedChargedDash dash = Object.FindFirstObjectByType<AimedChargedDash>();
-        if (dash != null) { dash.OnAimingCameraUpdated += SwitchCamera; }
+        //if (dash != null) { dash.OnAimingCameraUpdated += SwitchCamera; }
     }
 
     private void OnDisable()
     {
         AimedChargedDash dash = Object.FindFirstObjectByType<AimedChargedDash>();
-        if (dash != null) { dash.OnAimingCameraUpdated -= SwitchCamera; }
+        //if (dash != null) { dash.OnAimingCameraUpdated -= SwitchCamera; }
     }
 
     void Start()

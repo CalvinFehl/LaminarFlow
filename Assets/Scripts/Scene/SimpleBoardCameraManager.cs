@@ -62,6 +62,11 @@ public class SimpleBoardCameraManager : MonoBehaviour, IHandleInput, IHandleRigi
         }
     }
 
+    private void Start()
+    {
+        SwitchCameraMode(CameraMode.Follow);
+    }
+
     private void LateUpdate()
     {
         HandleFollowCamOffset();
@@ -109,4 +114,22 @@ public class SimpleBoardCameraManager : MonoBehaviour, IHandleInput, IHandleRigi
             offset.Offset = new Vector3(orbitPosition.x, 0f, orbitPosition.y);
         }
     }
+    public void SwitchCameraMode(CameraMode newMode = CameraMode.Follow)
+    {
+        if (currentCameraMode == newMode || followCamera == null || aimCamera == null) return;
+
+        currentCameraMode = newMode;
+        switch (currentCameraMode)
+        {
+            case CameraMode.Follow:
+                followCamera.Priority = 10;
+                aimCamera.Priority = 5;
+                break;
+            case CameraMode.Aim:
+                followCamera.Priority = 5;
+                aimCamera.Priority = 10;
+                break;
+        }
+    }
+
 }
