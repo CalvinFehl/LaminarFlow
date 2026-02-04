@@ -139,15 +139,18 @@ public class SimpleMagnet : MonoBehaviour, IReferenceRigidbody, IHandleInput, IH
         foreach (GameObject boostableObject in boostableObjects)
         {
             // Boost PD values (when engagesMagnetism is true) -> x * factor
-            // or reset them (when engagesMagnetism is false) -> x / factor
+            // or reset them (when engagesMagnetism is false)
 
-            Vector3 _pFactorsBoost = engagesMagnetism ? pFactorsBoost : new Vector3(Invert(pFactorsBoost.x), Invert(pFactorsBoost.y), Invert(pFactorsBoost.z));
-            Vector3 _dFactorsBoost = engagesMagnetism ? dFactorsBoost : new Vector3(Invert(dFactorsBoost.x), Invert(dFactorsBoost.y), Invert(dFactorsBoost.z));
-
-            boostableObject.GetComponent<IAccessibleSinglePDController>()?.BoostPDValues(
-                engagesMagnetism ? pFactorBoost : Invert(pFactorBoost), 
-                engagesMagnetism ? dFactorBoost : Invert(dFactorBoost));
-            boostableObject.GetComponent<IAccessibleTriplePDController>()?.BoostPDValues(_pFactorsBoost, _dFactorsBoost);
+            if (engagesMagnetism)
+            {
+                boostableObject.GetComponent<IAccessibleSinglePDController>()?.BoostPDValues(pFactorBoost, dFactorBoost);
+                boostableObject.GetComponent<IAccessibleTriplePDController>()?.BoostPDValues(pFactorsBoost, dFactorsBoost);
+            }
+            else
+            {
+                boostableObject.GetComponent<IAccessibleSinglePDController>()?.ReloadPDController();
+                boostableObject.GetComponent<IAccessibleTriplePDController>()?.ReloadPDController();
+            }
 
             // Toggle Gravity
             var gravity = boostableObject.GetComponent<SimpleGravity>();
