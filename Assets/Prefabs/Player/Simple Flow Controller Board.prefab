@@ -3080,7 +3080,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3499644875289222200}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 11028b1decacc2049991867f33e4b0aa, type: 3}
   m_Name: 
@@ -3578,6 +3578,60 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &3885744529359738023
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8327359078885260199}
+  - component: {fileID: 1453140830726191980}
+  m_Layer: 2
+  m_Name: Simple Teleport
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8327359078885260199
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3885744529359738023}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6199418357966089435}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1453140830726191980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3885744529359738023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02adb0e13d62b194aae762f1de23486c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SimpleTeleporter
+  referenceTransform: {fileID: 1581727344496979978}
+  cameraManager: {fileID: 1268745627257449365}
+  buttonPressed: 0
+  spawnPositionOffset: {x: 0, y: 0, z: 0}
+  spawnRotationOffset: {x: 0, y: 0, z: 0, w: 1}
+  cameraPosition: {x: 0, y: 0, z: 0}
+  cameraRotation: {x: 0, y: 0, z: 0, w: 1}
+  teleportButton: 11
+  holdTimeToTeleport: 0.7
+  doublePressTimeToSetCheckpoint: 0.5
 --- !u!1 &3937061083917454068
 GameObject:
   m_ObjectHideFlags: 0
@@ -3767,6 +3821,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1754751627428084458}
+  - {fileID: 8327359078885260199}
   - {fileID: 4923851716188265488}
   - {fileID: 1338576220713065533}
   - {fileID: 7080522617025026061}
@@ -7914,6 +7969,7 @@ MonoBehaviour:
   groundProcessor: {fileID: 0}
   allModules:
   - {fileID: 8878547956967660432}
+  - {fileID: 3885744529359738023}
   - {fileID: 5628279533970881961}
   - {fileID: 6684671174839994192}
   - {fileID: 3982125802213161584}
@@ -8590,15 +8646,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SimpleBoardCameraManager
   followCamera: {fileID: 0}
   aimCamera: {fileID: 0}
+  canOrbit360: 0
+  orbitAngle: 0
+  currentCameraMode: 0
   inputAxis: 3
   orbitRadius: 6
   orbitingSpeed: 0.2
   orbitReturnSpeed: 0.6
   whileRidingMaxAngle: 0
   standingTimeTreshold: 1
-  canOrbit360: 0
-  orbitAngle: 0
-  currentCameraMode: 0
 --- !u!1 &8897895572787589599
 GameObject:
   m_ObjectHideFlags: 0

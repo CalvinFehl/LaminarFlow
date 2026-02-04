@@ -81,10 +81,10 @@ public class FlowControllerNetworkAdapter : MonoBehaviour
         boardInputActions.Board.ActionTrigger7.canceled += _ => xButton = false;
         boardInputActions.Board.ActionTrigger8.canceled += _ => yButton = false;
         boardInputActions.Board.ActionTrigger9.canceled += _ => northButton = false;
-        boardInputActions.Board.ActionTrigger10.performed += _ => eastButton = false;
-        boardInputActions.Board.ActionTrigger11.performed += _ => southButton = false;
-        boardInputActions.Board.ActionTrigger12.performed += _ => westButton = false;
-        boardInputActions.Board.ActionTrigger13.performed += _ => startButton = false;
+        boardInputActions.Board.ActionTrigger10.canceled += _ => eastButton = false;
+        boardInputActions.Board.ActionTrigger11.canceled += _ => southButton = false;
+        boardInputActions.Board.ActionTrigger12.canceled += _ => westButton = false;
+        boardInputActions.Board.ActionTrigger13.canceled += _ => startButton = false;
 
         //boardInputActions.Board.SingleAxis1.performed += ctx => leftTrigger = ctx.ReadValue<float>();
         //boardInputActions.Board.SingleAxis2.performed += ctx => rightTrigger = ctx.ReadValue<float>();

@@ -145,25 +145,6 @@ public class FlowController : MonoBehaviour, IReposition, IReferenceRigidbody
     }
 
 
-    // ISwitchToController Methods
-    public void SwitchToController(bool isOwner = false)
-    {
-        if (CameraSystem != null && isOwner)
-        {
-            CameraSystem.transform.SetParent(null);
-            CameraSystem.SetActive(true);
-        }
-    }
-
-    public void SwitchFromController(bool isOwner = false)
-    {
-        if (CameraSystem != null && isOwner)
-        {         
-            CameraSystem.transform.SetParent(this.transform);
-            CameraSystem.SetActive(false);
-        }
-    }
-
     public void Simulate(float deltaTime, in GamepadInput input)
     {
         /*  1. Input
