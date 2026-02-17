@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SimpleGravity : BaseInteractiveModule, IReferenceRigidbody, IHandleInput, ISimulateable
+public class SimpleGravity : MonoBehaviour, IReferenceRigidbody, IHandleInput, ISimulateable
 {
     public Rigidbody PhysicsRigidbody { get; set; }
     [SerializeField] private GetGamepadParameter inputLogic = new GetGamepadParameter();

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PDThruster : BaseInteractiveModule, IReferenceRigidbody, IHandleInput, IHandleGroundData, ISimulateable, IAccessibleSinglePDController, IReconsileFloat
+public class PDThruster : MonoBehaviour, IReferenceRigidbody, IHandleInput, IHandleGroundData, ISimulateable, IAccessibleSinglePDController, IReconsileFloat
 {
     public Rigidbody PhysicsRigidbody { get; set; }
     [SerializeField] private GetGamepadParameter inputLogic = new GetGamepadParameter();

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SimplePDStabilizer : BaseInteractiveModule, IReferenceRigidbody, IHandleGroundData, ISimulateable, IAccessibleTriplePDController
+public class SimplePDStabilizer : MonoBehaviour, IReferenceRigidbody, IHandleGroundData, ISimulateable, IAccessibleTriplePDController
 {
     public Rigidbody PhysicsRigidbody { get; set; }
     [SerializeField] private PDRotationController pdRotationController;

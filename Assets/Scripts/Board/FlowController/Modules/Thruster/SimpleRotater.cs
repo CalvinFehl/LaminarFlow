@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class SimpleRotater : BaseInteractiveModule, IReferenceRigidbody, IHandleInput, ISimulateable
+public class SimpleRotater : MonoBehaviour, IReferenceRigidbody, IHandleInput, ISimulateable
 {
     public Rigidbody PhysicsRigidbody { get; set; }
     [SerializeField] private GetGamepadParameter inputLogic = new GetGamepadParameter();
