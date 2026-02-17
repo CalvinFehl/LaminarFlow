@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 692283ee19ebf944798a01e076103ecd, type: 3}
+  m_Name: WaterSimulation_Foam_settings
+  m_EditorClassIdentifier: 
+  version: 1
+  textureSize: {x: 256, y: 128}
+  applyPressureFoam: 0
+  pressureRange: {x: 0.4208788, y: 0.6301731}
+  pressureIncreaseAmount: 0.5
+  exponentialDecayRate: 0.132
+  linearDecayRate: 0.05
+  applyWaveFoam: 0
+  waveAngleRange: {x: 0, y: 0.2461978}
+  waveAngleIncreaseAmount: 0.25
+  waveHeightIncreaseAmount: 0.5
+  waveExponentialDecayRate: 0
+  waveLinearDecayRate: 0
+  applyShallowFoam: 1
+  shallowFoamAmount: 1
+  shallowVelocityRange: {x: 0, y: 10}
+  shallowDepth: 0
+  applyTurbulenceFoam: 1
+  turbulenceFoamAmount: 1
+  turbulenceFoamThreshold: 0.1

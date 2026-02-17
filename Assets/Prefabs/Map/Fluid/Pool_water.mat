@@ -1,0 +1,128 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Pool_water
+  m_Shader: {fileID: 4800000, guid: e80f85116a2a050418071594363e93f4, type: 3}
+  m_ValidKeywords:
+  - _FOAMMODE_CLIP
+  - _FOAM_NORMALMAP
+  - _NORMALMAP
+  - _PLANAR_REFLECTION_ON
+  - _SCREENSPACE_REFRACTION_ABSORB
+  - _SHADOWMAP_HARD
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: 2510
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _FoamNormalMap:
+        m_Texture: {fileID: 2800000, guid: 515665f7ae9a0ea43813c2fc519aafdf, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FoamTexture:
+        m_Texture: {fileID: 2800000, guid: 64c12d2b4f9440045bb9334224ce76a9, type: 3}
+        m_Scale: {x: 2, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WaveNormals:
+        m_Texture: {fileID: 2800000, guid: 02efeb67b3ea8be4580b653995b06ba5, type: 3}
+        m_Scale: {x: 20, y: 10}
+        m_Offset: {x: 0, y: 0}
+    m_Ints:
+    - _DisplacementWaves: 0
+    - _DstBlend: 0
+    - _FoamMode: 1
+    - _FoamScreenSpace: 0
+    - _PlanarReflections: 1
+    - _ScreenSpaceRefraction: 2
+    - _ShadowMap: 1
+    - _SrcBlend: 1
+    m_Floats:
+    - _AbsorptionDepthScale: 1
+    - _AddPrecomputedVelocity: 0
+    - _AlphaCutoffEnable: 0
+    - _AlphaDstBlend: 0
+    - _AlphaSrcBlend: 1
+    - _ConservativeDepthOffsetEnable: 0
+    - _CullMode: 2
+    - _CullModeForward: 2
+    - _DepthOffsetEnable: 0
+    - _DisplacementPhase: 1
+    - _DisplacementScale: 200
+    - _DisplacementSteepness: 0
+    - _DisplacementWaveAmplitude: 0.25
+    - _DisplacementWaveLength: 2
+    - _DisplacementWaveSpeed: 0.1
+    - _DoubleSidedEnable: 0
+    - _DoubleSidedGIMode: 0
+    - _DoubleSidedNormalMode: 2
+    - _DstBlend2: 0
+    - _EnableBlendModePreserveSpecularLighting: 1
+    - _EnableFogOnTransparent: 1
+    - _ExcludeFromTUAndAA: 0
+    - _ExponentialClipOffset: 0
+    - _FadeHeight: 0.05
+    - _FoamNormalStrength: 0.25
+    - _Layer: 0
+    - _LinearClipOffset: 0
+    - _MaterialID: 4
+    - _MaterialTypeMask: 16
+    - _OpaqueCullMode: 2
+    - _PerPixelSorting: 0
+    - _RayTracing: 0
+    - _ReceivesSSR: 1
+    - _ReceivesSSRTransparent: 1
+    - _ReflectionDistortion: 0.1
+    - _ReflectivityMin: 0.05
+    - _RefractionDistortion: 0.074
+    - _RenderQueueType: 4
+    - _ScatterAmbient: 0.1
+    - _ScatterFoamIntensity: 0.5
+    - _ScatterIntensity: 1
+    - _ScatterLightIntensity: 10
+    - _ScatterViewIntensity: 0.1
+    - _SpecularIntensity: 1
+    - _StencilRef: 0
+    - _StencilRefDepth: 8
+    - _StencilRefDistortionVec: 4
+    - _StencilRefGBuffer: 10
+    - _StencilRefMV: 40
+    - _StencilWriteMask: 6
+    - _StencilWriteMaskDepth: 9
+    - _StencilWriteMaskDistortionVec: 4
+    - _StencilWriteMaskGBuffer: 15
+    - _StencilWriteMaskMV: 41
+    - _SupportDecals: 1
+    - _SurfaceType: 1
+    - _TransmissionEnable: 1
+    - _TransparentBackfaceEnable: 0
+    - _TransparentCullMode: 2
+    - _TransparentDepthPostpassEnable: 0
+    - _TransparentDepthPrepassEnable: 0
+    - _TransparentSortPriority: 0
+    - _TransparentWritingMotionVec: 0
+    - _TransparentZWrite: 0
+    - _UseShadowThreshold: 0
+    - _WaveNormalStrength: 0.5
+    - _ZTestDepthEqualForOpaque: 4
+    - _ZTestGBuffer: 4
+    - _ZTestTransparent: 4
+    - _ZWrite: 0
+    m_Colors:
+    - _CurvedWorldBendSettings: {r: 0, g: 0, b: 0, a: 0}
+    - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
+    - _FoamColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FoamVisibility: {r: 0, g: 0.464, b: 0, a: 0}
+    - _ScatterColor: {r: 0.34901956, g: 0.6313726, b: 0.58431375, a: 1}
+    - _WaterColor: {r: 0.9103774, g: 0.9834543, b: 1, a: 1}
+  m_BuildTextureStacks: []
