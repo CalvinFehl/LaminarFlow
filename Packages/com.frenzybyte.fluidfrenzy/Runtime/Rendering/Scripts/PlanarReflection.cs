@@ -66,6 +66,12 @@ namespace FluidFrenzy
 		/// </summary>
 		[Tooltip("SRP Renderer to use for the planar reflection pass. Use this to set cheaper passes for planar reflections.")]
 		public int rendererID = 0;
+#else
+		/// <summary>
+		/// Controls shadow rendering in the reflection (BiRP Only).
+		/// </summary>
+		[Tooltip("Controls shadow rendering in the reflection.")]
+		public ShadowQuality shadowQuality = ShadowQuality.Disable;
 #endif
 
 		/// <summary>
@@ -161,10 +167,14 @@ namespace FluidFrenzy
 			CreateWaterObjects();
 		}
 
+		private void Update()
+		{
+			m_reflectionCamera.cullingMask = cullingMask;
+		}
 
 		private void PreRender(Camera cam)
 		{
-			
+
 			if (cam.cameraType == CameraType.Preview || m_reflectionCamera == cam) return;
 			CreateWaterObjects();
 
@@ -199,7 +209,14 @@ namespace FluidFrenzy
 			int oldPixelLightCount = QualitySettings.pixelLightCount;
 			UnityEngine.ShadowQuality previousShadowQuality = QualitySettings.shadows;
 			QualitySettings.pixelLightCount = 0;
+
+#if !FLUIDFRENZY_RUNTIME_URP_SUPPORT
+			// Use the user-defined setting in BiRP
+			QualitySettings.shadows = shadowQuality;
+#else
+
 			QualitySettings.shadows = UnityEngine.ShadowQuality.Disable;
+#endif
 
 			UpdateCameraModes(cam, m_reflectionCamera);
 

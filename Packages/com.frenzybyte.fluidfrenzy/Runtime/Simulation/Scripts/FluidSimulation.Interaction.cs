@@ -53,12 +53,12 @@ namespace FluidFrenzy
 		public static Vector4 LayerToLayerMask(int layer)
 		{
 			return s_LayerToLayerMask[layer];
-		}		
-		
+		}
+
 		public static Vector4 LayerToBottomLayersMask(int layer)
 		{
 			return s_BottomLayerMask[layer];
-		}		
+		}
 		public static Vector4 LayerToTotalHeightLayerMask(int layer)
 		{
 			return s_TotalHeightLayerMask[layer];
@@ -91,14 +91,24 @@ namespace FluidFrenzy
 			/// </summary>
 			WorldHeight,
 		}
+
 		public Vector2 WorldSpaceToUVSpace(Vector3 worldPos)
 		{
-			return WorldSpaceToUVSpace(worldPos, bounds, dimension);
+			// Transform world position to local space relative to the simulation container
+			// This handles Position and Rotation of the simulation object
+			Vector3 localPos = m_cachedTransform.InverseTransformPoint(worldPos);
+
+			// Map local position to UV [0,1]. Assuming simulation is centered at local (0,0,0) with 'dimension' size.
+			float u = localPos.x / dimension.x + 0.5f;
+			float v = localPos.z / dimension.y + 0.5f;
+
+			return new Vector2(u, v);
 		}
 
 		public Vector2 WorldSpaceToPaddedUVSpace(Vector3 worldPos)
 		{
-			Vector2 uvPos = WorldSpaceToUVSpace(worldPos, bounds, dimension);
+			// Use the instance method that handles rotation
+			Vector2 uvPos = WorldSpaceToUVSpace(worldPos);
 			uvPos.x *= m_paddingST.x; uvPos.y *= m_paddingST.y;
 			uvPos.x += m_paddingST.z; uvPos.y += m_paddingST.w;
 			return uvPos;
@@ -106,7 +116,8 @@ namespace FluidFrenzy
 
 		public Vector2 WorldSpaceToPaddedVelocityUVSpace(Vector3 worldPos)
 		{
-			Vector2 uvPos = WorldSpaceToUVSpace(worldPos, bounds, dimension);
+			// Use the instance method that handles rotation
+			Vector2 uvPos = WorldSpaceToUVSpace(worldPos);
 			uvPos.x *= m_velocityTextureST.x; uvPos.y *= m_velocityTextureST.y;
 			uvPos.x += m_velocityTextureST.z; uvPos.y += m_velocityTextureST.w;
 			return uvPos;
@@ -118,8 +129,8 @@ namespace FluidFrenzy
 			float v = (worldPos.z - bounds.center.z) / dimension.y + 0.5f;
 
 			return new Vector2(u, v);
-		}		
-		
+		}
+
 		public static Vector2 WorldSizeToUVSize(Vector2 size, Vector2 dimension)
 		{
 			return size / dimension;
@@ -127,12 +138,22 @@ namespace FluidFrenzy
 
 		private float WorldRadiusToUVRadius(float radius)
 		{
-			return radius / dimension.x;
+			// Scale the radius to local space
+			float scale = Mathf.Abs(m_cachedTransform.lossyScale.x);
+			if (scale < Mathf.Epsilon) scale = 1f;
+
+			return (radius / scale) / dimension.x;
 		}
 
-		public Vector2 WorldSizeToUVSize(Vector2 size)
+		public Vector2 WorldSizeToUVSize(Vector2 worldSize)
 		{
-			return WorldSizeToUVSize(size, dimension);
+			// Convert world size to local size (Apply Scale)
+			Vector3 scale = m_cachedTransform.lossyScale;
+			float scaleX = Mathf.Abs(scale.x) > Mathf.Epsilon ? scale.x : 1f;
+			float scaleZ = Mathf.Abs(scale.z) > Mathf.Epsilon ? scale.z : 1f;
+
+			// Convert local size to UV size
+			return new Vector2(worldSize.x / (dimension.x * scaleX), worldSize.y / (dimension.y * scaleZ));
 		}
 
 
@@ -189,8 +210,8 @@ namespace FluidFrenzy
 			m_dynamicCommandBuffer.SetComputeBufferParam(m_solidToFluidCS, kernel, FluidShaderProperties._HeightAccumulator, m_solidToFluidHeightDelta);
 			m_dynamicCommandBuffer.SetComputeBufferParam(m_solidToFluidCS, kernel, FluidShaderProperties._VelocityAccumulator, m_solidToFluidVelocityDelta);
 
-			m_dynamicCommandBuffer.SetComputeMatrixParam(m_solidToFluidCS, FluidShaderProperties._LocalToWorld, transform.worldToLocalMatrix * localToWorld);
-			m_dynamicCommandBuffer.SetComputeMatrixParam(m_solidToFluidCS, FluidShaderProperties._PrevLocalToWorld, transform.worldToLocalMatrix * prevLocalToWorld);
+			m_dynamicCommandBuffer.SetComputeMatrixParam(m_solidToFluidCS, FluidShaderProperties._LocalToWorld, m_cachedTransform.worldToLocalMatrix * localToWorld);
+			m_dynamicCommandBuffer.SetComputeMatrixParam(m_solidToFluidCS, FluidShaderProperties._PrevLocalToWorld, m_cachedTransform.worldToLocalMatrix * prevLocalToWorld);
 
 			m_dynamicCommandBuffer.SetComputeFloatParam(m_solidToFluidCS, FluidShaderProperties._HeightInfluence, displacementProfile.heightInfluence);
 			m_dynamicCommandBuffer.SetComputeFloatParam(m_solidToFluidCS, FluidShaderProperties._VelocityInfluence, displacementProfile.velocityInfluence);
@@ -283,9 +304,14 @@ namespace FluidFrenzy
 				Vector2 position = WorldSpaceToPaddedVelocityUVSpace(worldPos);
 				Vector2 uvSize = WorldSizeToUVSize(size);
 
+				// Rotate direction into local space
+				Vector3 worldDir = new Vector3(direction.x, 0, direction.y);
+				Vector3 localDir = m_cachedTransform.InverseTransformDirection(worldDir);
+				Vector2 effectiveDir = new Vector2(localDir.x, localDir.z);
+
 				m_externalPropertyBlock.Clear();
 				m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitScaleBiasRt, new Vector4(uvSize.x, uvSize.y, position.x, position.y));
-				m_externalPropertyBlock.SetVector(FluidShaderProperties._VelocityDir, direction);
+				m_externalPropertyBlock.SetVector(FluidShaderProperties._VelocityDir, effectiveDir);
 				m_externalPropertyBlock.SetFloat(FluidShaderProperties._IncreaseStrength, strength * timestep);
 				m_externalPropertyBlock.SetFloat(FluidShaderProperties._IncreaseExponent, falloff);
 				BlitQuad(m_dynamicCommandBuffer, null, m_activeVelocity, m_applyVelocityMaterial, m_externalPropertyBlock, pass);
@@ -361,7 +387,7 @@ namespace FluidFrenzy
 		/// <param name="size">The size of the area affected by the velocity.</param>
 		/// <param name="texture">The texture that defines the velocity effect.</param>
 		/// <param name="strength">The strength of the velocity effect.</param>
-		public virtual void SetVelocity(Vector3 worldPos, Vector2 size, Texture texture, float strength) 
+		public virtual void SetVelocity(Vector3 worldPos, Vector2 size, Texture texture, float strength)
 		{
 			ApplyVelocity(worldPos, size, texture, strength, 1, m_setVelocityTextureRemapped);
 		}
@@ -387,7 +413,7 @@ namespace FluidFrenzy
 		/// <param name="texture">The texture that defines the velocity effect.</param>
 		/// <param name="strength">The strength of the velocity effect.</param>
 		/// <param name="timestep">The time delta since the last update.</param>
-		private void ApplyVelocity(Vector3 worldPos, Vector2 size, Texture texture, float strength, float timestep, int pass) 
+		private void ApplyVelocity(Vector3 worldPos, Vector2 size, Texture texture, float strength, float timestep, int pass)
 		{
 			using (new ProfilingScope(m_dynamicCommandBuffer, ProfilingSampler.Get(WaterSimProfileID.ExternalForceTexture)))
 			{
@@ -434,7 +460,7 @@ namespace FluidFrenzy
 		/// <param name="falloff">The falloff used to control the gradient of the force effect.</param>
 		/// <param name="timestep">The time delta since the last update.</param>
 		/// <param name="splash">If true, applies the force as a splash(outward) effect; otherwise, applies as a directional force.</param>
-		public virtual void ApplyForce(Vector3 worldPos, Vector2 direction, Vector2 size, float strength, float falloff, float timestep, bool splash) {}
+		public virtual void ApplyForce(Vector3 worldPos, Vector2 direction, Vector2 size, float strength, float falloff, float timestep, bool splash) { }
 
 		/// <summary>
 		/// Applies a force effect based on a texture to the <see cref="FluidSimulation"/>.
@@ -442,7 +468,7 @@ namespace FluidFrenzy
 		/// <param name="texture">The texture that defines the force effect.</param>
 		/// <param name="strength">The strength of the force effect.</param>
 		/// <param name="timestep">The time delta since the last update.</param>
-		public virtual void ApplyForce(Texture texture, float strength, float timestep) {}
+		public virtual void ApplyForce(Texture texture, float strength, float timestep) { }
 
 		/// <summary>
 		/// Applies a force effect based on a texture to the <see cref="FluidSimulation"/>.
@@ -469,7 +495,7 @@ namespace FluidFrenzy
 		/// <param name="strength">The strength of the vortex effect.</param>
 		/// <param name="falloff">The falloff used to control the gradient of the vortex effect.</param>
 		/// <param name="timestep">The time delta since the last update.</param>
-		public virtual void ApplyForceVortex(Vector3 worldPos, Vector2 size, float strength, float falloff, float timestep) {}
+		public virtual void ApplyForceVortex(Vector3 worldPos, Vector2 size, float strength, float falloff, float timestep) { }
 
 
 		/// <summary>
@@ -530,11 +556,16 @@ namespace FluidFrenzy
 			Vector2 position = WorldSpaceToPaddedUVSpace(worldPos);
 			Vector2 uvSize = WorldSizeToUVSize(size);
 
+			// Scale strength by Y scale (assuming strength determines height added per second)
+			float scaleY = m_cachedTransform.lossyScale.y;
+			float scaledStrength = strength;
+			if (Mathf.Abs(scaleY) > Mathf.Epsilon) scaledStrength /= scaleY;
+
 			m_externalPropertyBlock.Clear();
 			m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitScaleBiasRt, new Vector4(uvSize.x, uvSize.y, position.x, position.y));
 			m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitRotation, Vector2.up);
 			m_externalPropertyBlock.SetVector(FluidShaderProperties._LayerMask, layer == 0 ? Vector3.right : Vector3.up);
-			m_externalPropertyBlock.SetFloat(FluidShaderProperties._IncreaseStrength, strength * dt);
+			m_externalPropertyBlock.SetFloat(FluidShaderProperties._IncreaseStrength, scaledStrength * dt);
 			m_externalPropertyBlock.SetFloat(FluidShaderProperties._IncreaseExponent, exponent);
 			BlitQuad(commandBuffer, null, dest, m_addFluidMaterial, m_externalPropertyBlock, pass);
 		}
@@ -828,8 +859,17 @@ namespace FluidFrenzy
 			Vector2 position = WorldSpaceToPaddedUVSpace(worldPos);
 			Vector2 uvSize = WorldSizeToUVSize(size);
 
-			float yOffset = space == FluidModifierSpace.WorldHeight ? transform.position.y : 0;
+			float yOffset = space == FluidModifierSpace.WorldHeight ? m_cachedTransform.position.y : 0;
 			float amount = height;
+
+			// Scale the height values to match local simulation space
+			float scaleY = m_cachedTransform.lossyScale.y;
+			if (Mathf.Abs(scaleY) > Mathf.Epsilon)
+			{
+				amount /= scaleY;
+				yOffset /= scaleY;
+			}
+
 			m_externalPropertyBlock.Clear();
 			m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitScaleBiasRt, new Vector4(uvSize.x, uvSize.y, position.x, position.y));
 			m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitRotation, Vector2.up);
@@ -839,7 +879,7 @@ namespace FluidFrenzy
 			//m_externalPropertyBlock.SetTexture(FluidShaderProperties._FluidHeightField, dest);
 			m_externalPropertyBlock.SetTexture(FluidShaderProperties._TerrainHeightField, m_terrainHeight);
 			commandBuffer.SetGlobalInt(FluidShaderProperties._ColorMaskFluidInteraction, LayerToColorMask(layer));
-			commandBuffer.SetGlobalInt(FluidShaderProperties._BlendOpFluidInteraction, (int)blendOp); 
+			commandBuffer.SetGlobalInt(FluidShaderProperties._BlendOpFluidInteraction, (int)blendOp);
 			BlitQuad(commandBuffer, null, dest, m_addFluidMaterial, m_externalPropertyBlock, pass);
 		}
 
@@ -848,8 +888,17 @@ namespace FluidFrenzy
 			Vector2 position = WorldSpaceToPaddedUVSpace(worldPos);
 			Vector2 uvSize = WorldSizeToUVSize(size);
 
-			float yOffset = space == FluidModifierSpace.WorldHeight ? transform.position.y : 0;
+			float yOffset = space == FluidModifierSpace.WorldHeight ? m_cachedTransform.position.y : 0;
 			float amount = height;
+
+			// Scale the height values to match local simulation space
+			float scaleY = m_cachedTransform.lossyScale.y;
+			if (Mathf.Abs(scaleY) > Mathf.Epsilon)
+			{
+				amount /= scaleY;
+				yOffset /= scaleY;
+			}
+
 			m_externalPropertyBlock.Clear();
 			m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitScaleBiasRt, new Vector4(uvSize.x, uvSize.y, position.x, position.y));
 			m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitRotation, Vector2.up);
@@ -867,7 +916,7 @@ namespace FluidFrenzy
 			{
 				m_externalPropertyBlock.Clear();
 				m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitScaleBiasRt, new Vector4(1.0f, 1.0f, 0.5f, 0.5f)); //Focus around the center of the volume. So we need to offset same for global static texture
-				m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitRotation, Vector2.up); 
+				m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitRotation, Vector2.up);
 				m_externalPropertyBlock.SetTexture(FluidShaderProperties._FluidHeightField, current); //Focus around the center of the volume. So we need to offset same for global static texture
 				BlitQuad(commandBuffer, source, dest, m_addFluidMaterial, m_externalPropertyBlock, m_addFluidTextureStaticPass);
 			}
@@ -879,7 +928,7 @@ namespace FluidFrenzy
 			{
 				m_externalPropertyBlock.Clear();
 				m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitScaleBiasRt, new Vector4(1.0f, 1.0f, 0.5f, 0.5f)); //Focus around the center of the volume. So we need to offset same for global static texture
-				m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitRotation, Vector2.up); 
+				m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitRotation, Vector2.up);
 				m_externalPropertyBlock.SetTexture(FluidShaderProperties._FluidHeightField, current); //Focus around the center of the volume. So we need to offset same for global static texture
 				BlitQuad(commandBuffer, source, dest, m_addFluidMaterial, m_externalPropertyBlock, m_addFluidTextureDynamicPass);
 			}
@@ -905,97 +954,136 @@ namespace FluidFrenzy
 				Vector2 position = WorldSpaceToPaddedUVSpace(worldPos);
 				Vector2 uvSize = WorldSizeToUVSize(worldSize);
 
+				// Scale strength by Y scale
+				float scaleY = m_cachedTransform.lossyScale.y;
+				float scaledStrength = strength;
+				if (Mathf.Abs(scaleY) > Mathf.Epsilon) scaledStrength /= scaleY;
+
 				m_externalPropertyBlock.Clear();
 				m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitScaleBiasRt, new Vector4(uvSize.x, uvSize.y, position.x, position.y));
 				m_externalPropertyBlock.SetVector(FluidShaderProperties._BlitRotation, Vector2.up);
 				m_externalPropertyBlock.SetVector(FluidShaderProperties._LayerMask, layer == 0 ? Vector3.right : Vector3.up);
-				m_externalPropertyBlock.SetFloat(FluidShaderProperties._IncreaseStrength, strength * dt);
+				m_externalPropertyBlock.SetFloat(FluidShaderProperties._IncreaseStrength, scaledStrength * dt);
 				BlitQuad(commandBuffer, source, dest, m_addFluidMaterial, m_externalPropertyBlock, m_addFluidTexturePass);
 			}
 		}
 
-		private float GetProjectedQuadSize(FluidObstacleData data)
+		/// <summary>
+		/// Calculates the bounding box of the obstacle in Simulation Local Space.
+		/// This handles the relative rotation and scale between the obstacle and the simulation.
+		/// </summary>
+		private void GetObstacleBoundsInSimSpace(FluidObstacleData data, out Vector3 center, out Vector2 size)
 		{
-			if (data.shape == FluidSimulationObstacle.ObstacleShape.Sphere) return data.radius * 2.0f;
-			if (data.shape == FluidSimulationObstacle.ObstacleShape.Ellipsoid)
-				return Mathf.Max(data.boxSize.x, Mathf.Max(data.boxSize.y, data.boxSize.z)) * 2.0f;
+			// Matrix: Obstacle Local to Simulation Local
+			// We go Obstacle to World to Simulation
+			Matrix4x4 obsToWorld = Matrix4x4.TRS(data.position, data.rotation, Vector3.one);
+			Matrix4x4 worldToSim = m_cachedTransform.worldToLocalMatrix;
+			Matrix4x4 obsToSim = worldToSim * obsToWorld;
 
-			Vector3 right = data.rotation * Vector3.right;
-			Vector3 up = data.rotation * Vector3.up;
-			Vector3 fwd = data.rotation * Vector3.forward;
-
-			float widthX = 0f;
-			float depthZ = 0f;
-
-			switch (data.shape)
-			{
-				case FluidSimulationObstacle.ObstacleShape.Box:
-				case FluidSimulationObstacle.ObstacleShape.Wedge:
-					widthX = Mathf.Abs(right.x) * data.boxSize.x + Mathf.Abs(up.x) * data.boxSize.y + Mathf.Abs(fwd.x) * data.boxSize.z;
-					depthZ = Mathf.Abs(right.z) * data.boxSize.x + Mathf.Abs(up.z) * data.boxSize.y + Mathf.Abs(fwd.z) * data.boxSize.z;
-					break;
-
-				default:
-					float maxR = data.radius;
-					if (data.shape == FluidSimulationObstacle.ObstacleShape.CappedCone) maxR = Mathf.Max(data.radius, data.radius2);
-					if (data.shape == FluidSimulationObstacle.ObstacleShape.HexPrism) maxR *= 1.155f;
-
-					float spineX = Mathf.Abs(fwd.x) * data.height;
-					float spineZ = Mathf.Abs(fwd.z) * data.height;
-
-					widthX = spineX + (maxR * 2.0f);
-					depthZ = spineZ + (maxR * 2.0f);
-					break;
-			}
-
-			return Mathf.Max(widthX, depthZ);
-		}
-
-		internal void AddObstacle(CommandBuffer cmd, FluidObstacleData data)
-		{
-			float quadSize = GetProjectedQuadSize(data);
-
-			// Generic Shader Parameters
-			// _Size.x = Radius 1 / Box Half-X
-			// _Size.y = Radius 2 / Box Half-Y / Cylinder Half-Height
-			// _Size.z = Box Half-Z / Cone Half-Height
-			Vector3 shaderParam = Vector3.zero;
-
+			// Determine local extents of the shape
+			Vector3 extents = Vector3.zero;
 			switch (data.shape)
 			{
 				case FluidSimulationObstacle.ObstacleShape.Box:
 				case FluidSimulationObstacle.ObstacleShape.Wedge:
 				case FluidSimulationObstacle.ObstacleShape.Ellipsoid:
-					shaderParam = data.boxSize * 0.5f; // Half Extents
+					extents = data.boxSize * 0.5f;
+					break;
+				default:
+					float maxR = data.radius;
+					if (data.shape == FluidSimulationObstacle.ObstacleShape.CappedCone) maxR = Mathf.Max(data.radius, data.radius2);
+					if (data.shape == FluidSimulationObstacle.ObstacleShape.HexPrism) maxR *= 1.155f;
+					extents = new Vector3(maxR, data.height * 0.5f, maxR);
+					break;
+			}
+
+			// Transform the 8 corners of the obstacle into Simulation Space
+			Vector3 min = Vector3.positiveInfinity;
+			Vector3 max = Vector3.negativeInfinity;
+
+			Vector3[] corners = new Vector3[8]
+			{
+				new Vector3(extents.x, extents.y, extents.z),
+				new Vector3(extents.x, extents.y, -extents.z),
+				new Vector3(extents.x, -extents.y, extents.z),
+				new Vector3(extents.x, -extents.y, -extents.z),
+				new Vector3(-extents.x, extents.y, extents.z),
+				new Vector3(-extents.x, extents.y, -extents.z),
+				new Vector3(-extents.x, -extents.y, extents.z),
+				new Vector3(-extents.x, -extents.y, -extents.z)
+			};
+
+			for (int i = 0; i < 8; i++)
+			{
+				Vector3 simPoint = obsToSim.MultiplyPoint3x4(corners[i]);
+				min = Vector3.Min(min, simPoint);
+				max = Vector3.Max(max, simPoint);
+			}
+
+			// Return the center and size on the XZ plane of the simulation
+			Vector3 boundsMin = min;
+			Vector3 boundsMax = max;
+
+			center = (boundsMin + boundsMax) * 0.5f;
+
+			// padding
+			float padding = 1.0f / Mathf.Max(1e-5f, Mathf.Max(Mathf.Abs(m_cachedTransform.lossyScale.x), Mathf.Abs(m_cachedTransform.lossyScale.z)));
+			size = new Vector2(boundsMax.x - boundsMin.x, boundsMax.z - boundsMin.z) + new Vector2(padding, padding);
+		}
+
+		internal void AddObstacle(CommandBuffer cmd, FluidObstacleData data)
+		{
+			// Calculate Quad Geometry in Sim Local Space
+			GetObstacleBoundsInSimSpace(data, out Vector3 localCenter, out Vector2 localSize);
+
+			// Setup Matrices
+			Matrix4x4 simToWorld = m_cachedTransform.localToWorldMatrix;
+			Matrix4x4 worldToObs = Matrix4x4.TRS(data.position, data.rotation, Vector3.one).inverse;
+			Matrix4x4 simToObs = worldToObs * simToWorld;
+
+			// Setup Quad Matrix (Model Matrix)
+			Matrix4x4 quadMatrix = Matrix4x4.TRS(
+				new Vector3(localCenter.x, 0, localCenter.z),
+				Quaternion.Euler(90, 0, 0),
+				new Vector3(localSize.x, localSize.y, 1f)
+			);
+
+			// Shape Parameters
+			Vector3 shaderParam = Vector3.zero;
+			switch (data.shape)
+			{
+				case FluidSimulationObstacle.ObstacleShape.Box:
+				case FluidSimulationObstacle.ObstacleShape.Wedge:
+				case FluidSimulationObstacle.ObstacleShape.Ellipsoid:
+					shaderParam = data.boxSize * 0.5f;
 					break;
 				case FluidSimulationObstacle.ObstacleShape.Sphere:
 					shaderParam.x = data.radius;
 					break;
 				case FluidSimulationObstacle.ObstacleShape.CappedCone:
-					shaderParam.x = data.radius;  // Bot
-					shaderParam.y = data.radius2; // Top
-					shaderParam.z = data.height * 0.5f; // Half-Height
+					shaderParam.x = data.radius; shaderParam.y = data.radius2; shaderParam.z = data.height * 0.5f;
 					break;
 				default:
-					shaderParam.x = data.radius;
-					shaderParam.y = data.height * 0.5f; // Half-Height
+					shaderParam.x = data.radius; shaderParam.y = data.height * 0.5f;
 					break;
 			}
 
-			Matrix4x4 quadMatrix = Matrix4x4.TRS(data.position, Quaternion.Euler(90, 0, 0), new Vector3(quadSize, quadSize, 1f));
-			Matrix4x4 worldToLocal = Matrix4x4.TRS(data.position, data.rotation, Vector3.one).inverse;
+			// Padding
+			Vector2 resolution = new Vector2(m_obstacleHeight.width, m_obstacleHeight.height);
+			Vector2 paddingFactor = (new Vector2(ghostCells2.x, ghostCells2.y) + Vector2.one) / resolution;
+			Vector2 halfSize = (dimension * 0.5f) * (Vector2.one + paddingFactor);
+			Vector2 totalSize = halfSize * 2.0f;
 
-			Vector2 halfSize = dimension * 0.5f * (Vector2.one + (ghostCells2 + Vector2Int.one) / new Vector2(m_obstacleHeight.width, m_obstacleHeight.height));
-			Vector2 totalWorldSize = halfSize * 2.0f;
-			Vector2 worldTexelSize = new Vector2(totalWorldSize.x / m_obstacleHeight.width, totalWorldSize.y / m_obstacleHeight.height);
+			Vector2 localTexelSize = new Vector2(totalSize.x / resolution.x, totalSize.y / resolution.y);
 
 			int finalPass = (int)data.shape + (data.smooth ? 8 : 0);
 
 			m_externalPropertyBlock.Clear();
-			m_externalPropertyBlock.SetMatrix(FluidShaderProperties._Transform, worldToLocal);
-			m_externalPropertyBlock.SetVector(FluidShaderProperties._Center, data.position);
+			m_externalPropertyBlock.SetMatrix(FluidShaderProperties._Transform, simToObs);
 			m_externalPropertyBlock.SetVector(FluidShaderProperties._Size, shaderParam);
-			m_externalPropertyBlock.SetVector(FluidShaderProperties._TexelSize, worldTexelSize);
+			m_externalPropertyBlock.SetVector(FluidShaderProperties._TexelSize, localTexelSize);
+
+			m_externalPropertyBlock.SetVector(FluidShaderProperties._SimParams, new Vector4(totalSize.x, totalSize.y, 1f / totalSize.x, 1f / totalSize.y));
 
 			cmd.DrawProcedural(quadMatrix, m_obstacleProceduralMaterial, finalPass, MeshTopology.Quads, 4, 1, m_externalPropertyBlock);
 		}

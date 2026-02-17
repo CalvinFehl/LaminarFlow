@@ -237,7 +237,11 @@ void InitializeWaterInputData(inout FragInputs input, in FluidInputData fluidInp
 {
 	outWaterInput = (WaterInputData)(0);
 
+#ifdef _DOUBLESIDED_ON
 	outWaterInput.frontFaceMask = input.isFrontFace ? 1 : -1;
+#else
+	outWaterInput.frontFaceMask = 1;
+#endif
 	input.tangentToWorld[2] = input.tangentToWorld[2] * outWaterInput.frontFaceMask;
 	outWaterInput.positionWS = input.positionRWS.xyz;
 

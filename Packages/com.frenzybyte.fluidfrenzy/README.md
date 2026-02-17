@@ -1,8 +1,8 @@
 # About FluidFrenzy
 
-# Installing  FluidFrenzy
+# Installing FluidFrenzy
 
-# Using  FluidFrenzy
+# Using FluidFrenzy
 
 # Technical details
 ## Requirements

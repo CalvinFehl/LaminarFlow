@@ -253,7 +253,7 @@ namespace FluidFrenzy
 		{
 			if (m_renderMaterial)
 			{
-#if UNITY_2022_2_OR_NEWER || (UNITY_2021_3_OR_NEWER && !UNITY_2022_1_OR_NEWER)
+#if UNITY_2022_2_OR_NEWER || (FLUIDFRENZY_RUNTIME_HAS_COPY_MATCHING_PROPERTIES && !UNITY_2022_1_OR_NEWER)
 				m_renderMaterial.CopyMatchingPropertiesFromMaterial(fluidMaterial);
 #else
 				m_renderMaterial.CopyPropertiesFromMaterial(fluidMaterial);
@@ -279,7 +279,7 @@ namespace FluidFrenzy
 				m_renderMaterial.SetVector(FluidShaderProperties._FluidGridMeshResolution, Vector2.one * meshResolution);
 				m_renderMaterial.SetVector(FluidShaderProperties._FluidGridMeshRcp, Vector2.one / (meshResolution + Vector2.one));
 
-				m_renderMaterial.SetMatrix("_FluidGridWorldToObject", transform.worldToLocalMatrix);
+				m_renderMaterial.SetMatrix(FluidShaderProperties._FluidGridWorldToObject, transform.worldToLocalMatrix);
 
 				//if(simulation.terrainType == FluidSimulation.TerrainType.SimpleTerrain)
 				//	m_renderMaterial.SetTexture(FluidShaderProperties._TerrainHeightField, simulation.simpleTerrain.renderHeightmap);

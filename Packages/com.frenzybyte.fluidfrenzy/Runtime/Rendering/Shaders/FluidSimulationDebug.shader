@@ -19,6 +19,8 @@
 			#include "UnityShadowLibrary.cginc"
 			#include "UnityStandardCore.cginc"
 			#include "UnityStandardInput.cginc"
+
+			#define FLUIDFRENZY_USE_TRANSPARENT_SHADOWS
 			#include "Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Library/ShadowSampling.cginc"
 			#include "Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Library/LOD/FluidInstancingCommon.hlsl"
 			#include "Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Library/FluidRenderingCommon.hlsl"

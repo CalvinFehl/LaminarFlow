@@ -11,6 +11,7 @@
 #if _TRANSPARENT_RECEIVE_SHADOWS_CLOSE_FIT || _TRANSPARENT_RECEIVE_SHADOWS_SPLIT_SPHERES
 #define _TRANSPARENT_RECEIVE_SHADOWS
 #endif
+#define FLUIDFRENZY_USE_TRANSPARENT_SHADOWS
 #include "Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/Shaders/Library/ShadowSampling.cginc"
 
 #include "UnityCG.cginc"

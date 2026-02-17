@@ -123,9 +123,9 @@ namespace FluidFrenzy
 		}
 
 
-		private static int HeightToLayer(Vector2 height)
+		private static int HeightToLayer(float height)
 		{
-			return height.x < 0 ? 2 : 1;
+			return height < 0 ? 2 : 1;
 		}	
 
 		private Vector2 PixelToHeight(long pixel)
@@ -166,7 +166,7 @@ namespace FluidFrenzy
 		{
 			long pixel = GetHeightVelocityPixel(m_heightVelocityData, texPos, m_renderDataWidth, m_renderDataHeight);
 			outPos = PixelToHeight(pixel);
-			outLayer = HeightToLayer(PixelToHeight(pixel));
+			outLayer = HeightToLayer(GraphicsHelpers.GetFirstHalfSign(pixel));
 			return true;
 		}
 
@@ -326,7 +326,7 @@ namespace FluidFrenzy
 			Vector2Int texPos = GetHeightTexturePos(uvPos, width, height);
 			long pixel = GetHeightVelocityPixel(data, texPos, width, height);
 			heightData = PixelToHeight(pixel, cachedPosition);
-			layer = HeightToLayer(heightData);
+			layer = HeightToLayer(GraphicsHelpers.GetFirstHalfSign(pixel));
 			return true;
 		}
 

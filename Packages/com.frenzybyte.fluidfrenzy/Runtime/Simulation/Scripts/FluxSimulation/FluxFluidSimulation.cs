@@ -229,7 +229,10 @@ namespace FluidFrenzy
 			UpdateSimulationConstants(fluidTimestep);
 			UpdateFluidInput(numIterations, fluidTimestep);
 
-			m_solidToFluidCS.EnableKeyword("USE_FLUX_SIMULATION");
+			if (SystemInfo.supportsComputeShaders)
+			{
+				m_solidToFluidCS.EnableKeyword("USE_FLUX_SIMULATION");
+			}
 
 			UpdateFluidRigidBody();
 		}

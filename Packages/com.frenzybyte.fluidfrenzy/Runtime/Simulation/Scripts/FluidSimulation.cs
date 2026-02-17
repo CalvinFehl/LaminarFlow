@@ -833,7 +833,18 @@ namespace FluidFrenzy
 #endif
 				{
 					Vector2 size = dimension * 0.5f * (Vector2.one + (ghostCells2 + Vector2Int.one) / new Vector2(m_obstacleHeight.width, m_obstacleHeight.height));
-					Matrix4x4 viewMatrix = Matrix4x4.TRS(m_cachedTransform.position + Vector3.up * 1000, Quaternion.Euler(90, 0, 0), new Vector3(1, 1, -1)).inverse;
+					Vector3 scale = m_cachedTransform.lossyScale;
+					size.x *= scale.x;
+					size.y *= scale.z;
+
+					float heightNormalization = 1.0f;
+					if (Mathf.Abs(scale.y) > 1e-5f)
+						heightNormalization = 1.0f / scale.y;
+
+					// Pass this to the shader
+					m_dynamicCommandBuffer.SetGlobalFloat(FluidShaderProperties._HeightNormalization, heightNormalization);
+
+					Matrix4x4 viewMatrix = Matrix4x4.TRS(m_cachedTransform.position + Vector3.up * 1000, Quaternion.Euler(90, m_cachedTransform.rotation.eulerAngles.y, 0), new Vector3(1, 1, -1)).inverse;
 					Matrix4x4 projMatrix = Matrix4x4.Ortho(-size.x, size.x, -size.y, size.y, 0.1f, 10000);
 					m_dynamicCommandBuffer.SetViewProjectionMatrices(viewMatrix, projMatrix);
 					m_dynamicCommandBuffer.SetRenderTarget(m_obstacleHeight);
@@ -853,7 +864,7 @@ namespace FluidFrenzy
 				m_updateObstacles = false;
 
 				bool refreshTerrain = true;
-				if (TryGetFluidLayer(out TerraformLayer layer))
+				if (TryGetFluidLayer(out ErosionLayer layer))
 				{
 					refreshTerrain = !layer.isActiveAndEnabled;
 				}

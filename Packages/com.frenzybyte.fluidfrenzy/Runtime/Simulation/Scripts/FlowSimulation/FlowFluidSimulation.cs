@@ -504,7 +504,7 @@ namespace FluidFrenzy
 				UpdateSlipFree();
 				for (int i = 0; i < numSteps; i++)
 				{
-					//Integrate Velocity
+					// Integrate Velocity
 					m_internalPropertyBlock.Clear();
 					m_internalPropertyBlock.SetFloat(FluidShaderProperties._TerrainHeightScale, terrainScale);
 					m_internalPropertyBlock.SetTexture(FluidShaderProperties._VelocityField, m_activeVelocity);
@@ -516,7 +516,7 @@ namespace FluidFrenzy
 
 					SwapVelocity();
 
-					//Integrate height
+					// Integrate height
 					m_internalPropertyBlock.Clear();
 					m_internalPropertyBlock.SetTexture(FluidShaderProperties._FluidHeightField, m_activeWaterHeight);
 					m_internalPropertyBlock.SetTexture(FluidShaderProperties._VelocityField, m_activeVelocity);
@@ -524,26 +524,30 @@ namespace FluidFrenzy
 					m_internalPropertyBlock.SetVector(FluidShaderProperties._BlitScaleBiasRt, Vector2.one);
 					BlitQuad(m_commandBuffer, null, m_nextWaterHeight, m_fluidSolverMaterial, m_internalPropertyBlock, m_fluidSolverIntegrateHeightPass);
 					SwapFluidRT();
+
+					// Overshooting Reduction (Moved inside loop)
+					if (m_internalSettings.overshootingReduction && m_internalSettings.overshootingScale > 0)
+					{
+						m_internalPropertyBlock.Clear();
+						m_internalPropertyBlock.SetFloat(FluidShaderProperties._TerrainHeightScale, terrainScale);
+						m_internalPropertyBlock.SetTexture(FluidShaderProperties._FluidHeightField, m_activeWaterHeight);
+						m_internalPropertyBlock.SetTexture(FluidShaderProperties._TerrainHeightField, m_terrainHeight);
+
+						m_internalPropertyBlock.SetVector(FluidShaderProperties._BlitScaleBias, Vector2.one);
+						m_internalPropertyBlock.SetVector(FluidShaderProperties._BlitScaleBiasRt, Vector2.one);
+
+						BlitQuad(m_commandBuffer, null, m_nextWaterHeight, m_fluidSolverMaterial, m_internalPropertyBlock, m_fluidSolverOvershootReductionPass);
+						SwapFluidRT();
+					}
 				}
 			}
 
 			m_commandBuffer.SetGlobalFloat(FluidShaderProperties._FluidSimDeltaTime, fluidTimestep * numSteps);
 
-			// Overshooting reduction
-			if (m_internalSettings.overshootingReduction && m_internalSettings.overshootingScale > 0)
-			{
-				m_internalPropertyBlock.Clear();
-				m_internalPropertyBlock.SetFloat(FluidShaderProperties._TerrainHeightScale, terrainScale);
-				m_internalPropertyBlock.SetTexture(FluidShaderProperties._FluidHeightField, m_activeWaterHeight);
-				m_internalPropertyBlock.SetTexture(FluidShaderProperties._TerrainHeightField, m_terrainHeight);
-				BlitQuad(m_commandBuffer, null, m_nextWaterHeight, m_fluidSolverMaterial, m_internalPropertyBlock, m_fluidSolverOvershootReductionPass);
-				SwapFluidRT();
-			}
-
 			Graphics.ExecuteCommandBuffer(m_dynamicCommandBuffer);
 			m_dynamicCommandBuffer.Clear();
 		}
-		
+
 		private void UpdateSlipFree()
 		{
 			if (!settings.openBorders)

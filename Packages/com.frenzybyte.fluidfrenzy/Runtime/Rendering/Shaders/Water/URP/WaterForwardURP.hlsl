@@ -94,7 +94,7 @@ void InitializeWaterInputData(Varyings input, bool isFrontFace, in FluidInputDat
 	outWaterInput.pixelZ = RealLinearEyeDepth(input.positionCS.z, _ZBufferParams);
 	outWaterInput.sceneDepth = SAMPLE_SCREENSPACE_TEXTURE(_CameraDepthTexture, outWaterInput.normalizedScreenSpaceUV).x;
 	outWaterInput.sceneZ = RealLinearEyeDepth(outWaterInput.sceneDepth, _ZBufferParams);
-	outWaterInput.waterDepth = outWaterInput.sceneZ - outWaterInput.pixelZ;
+	outWaterInput.waterDepth = max(outWaterInput.sceneZ - outWaterInput.pixelZ, 0);
 #endif
 
 	outWaterInput.normalWS = normalize(input.normalWS);

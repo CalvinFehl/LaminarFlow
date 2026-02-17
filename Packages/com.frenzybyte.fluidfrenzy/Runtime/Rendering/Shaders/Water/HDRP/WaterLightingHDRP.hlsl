@@ -195,15 +195,26 @@ half4 WaterLightingPBR(FragInputs input, in FluidInputData fluidInput, in WaterS
 
 	PreLightData preLightData = GetPreLightData(waterInput.viewDirectionWS, posInput, bsdfData);
 
+	float3 fogInscatter = 0;
+	float3 transmittance = 1;
+	#ifdef _ENABLE_FOG_ON_TRANSPARENT
+		// Get the fog factors for the distance from Camera to WATER SURFACE
+		EvaluateAtmosphericScattering(posInput, waterInput.viewDirectionWS, fogInscatter, transmittance);
+	#endif
+
+	// Remove the atmospheric inscatter from the background texture.
+	// This isn't perfect, but it prevents the "double fog" look.
+	float3 cleanedRefraction = max(0, waterInput.refractionColor.rgb - fogInscatter);
+    
+	WaterInputData adjustedInput = waterInput;
+	adjustedInput.refractionColor.rgb = cleanedRefraction;
+
 	// Apply absorption and refraction.
 	half4 absorptionColor;
-	WaterAbsorption(waterInput, absorptionColor);
-	WaterRefraction(color, absorptionColor, waterSurfaceData, waterInput);
+	WaterAbsorption(adjustedInput, absorptionColor);
+	WaterRefraction(color, absorptionColor, waterSurfaceData, adjustedInput);
 
 	ProcessLightsPBR(color, posInput, surfaceData, builtinData, bsdfData, preLightData, waterSurfaceData, waterInput, absorptionColor);
-
-	// Apply softening around edges where the water is shallow in fluid space.
-	color.rgb = lerp(waterInput.refractionColor.rgb, color.rgb, waterInput.fade);
 
 	if(!ApplyFog(color, GetAbsolutePositionWS(posInput.positionWS.xyz), waterInput.normalizedScreenSpaceUV, 0))
 	{
@@ -212,8 +223,10 @@ half4 WaterLightingPBR(FragInputs input, in FluidInputData fluidInput, in WaterS
 		#endif
 	}
 
-	color.a = builtinData.opacity;
+	// Apply softening around edges where the water is shallow in fluid space.
+	color.rgb = lerp(waterInput.refractionColor.rgb, color.rgb, waterInput.fade);
 
+	color.a = builtinData.opacity;
 
 	return color;
 }

@@ -60,6 +60,7 @@ namespace FluidFrenzy
 		public static readonly int _WorldCellSize = Shader.PropertyToID("_WorldCellSize");
 		public static readonly int _WorldCellSizeRcp = Shader.PropertyToID("_WorldCellSizeRcp");
 		public static readonly int _SimulationPositionWS = Shader.PropertyToID("_SimulationPositionWS");
+		public static readonly int _HeightNormalization = Shader.PropertyToID("_HeightNormalization");
 
 		public static readonly int _CellSize = Shader.PropertyToID("_CellSize");
 		public static readonly int _CellSizeScale = Shader.PropertyToID("_CellSizeScale");
@@ -69,6 +70,7 @@ namespace FluidFrenzy
 		public static readonly int _Damping = Shader.PropertyToID("_Damping");
 		public static readonly int _AccelCellSizeDeltaTime = Shader.PropertyToID("_AccelCellSizeDeltaTime");
 		public static readonly int _RcpCellSizeSqDeltaTime = Shader.PropertyToID("_RcpCellSizeSqDeltaTime");
+		public static readonly int _SimParams = Shader.PropertyToID("_SimParams");
 
 		public static readonly int _FluidViscosity = Shader.PropertyToID("_FluidViscosity");
 		public static readonly int _FluidFlowHeight = Shader.PropertyToID("_FluidFlowHeight");
@@ -230,6 +232,7 @@ namespace FluidFrenzy
 		public static readonly int _FlowTimer = Shader.PropertyToID("_FlowTimer");
 		public static readonly int _FlowUVOffset = Shader.PropertyToID("_FlowUVOffset");
 
+		public static readonly int _FluidGridWorldToObject = Shader.PropertyToID("_FluidGridWorldToObject");
 		public static readonly int _FluidGridMeshDimensions = Shader.PropertyToID("_FluidGridMeshDimensions");
 		public static readonly int _FluidGridMeshResolution = Shader.PropertyToID("_FluidGridMeshResolution");
 		public static readonly int _FluidGridMeshRcp = Shader.PropertyToID("_FluidGridMeshRcp");

@@ -20,6 +20,7 @@ namespace FluidFrenzy
 		/// </remarks>
 		public FoamLayer foamLayer;
 
+		#region Underwater Effects
 		/// <summary>
 		/// Controls whether the <see cref="UnderwaterEffect">underwater visual effect</see> is currently enabled.
 		/// </summary>
@@ -32,121 +33,77 @@ namespace FluidFrenzy
 		/// This class defines how light interacts with the water volume, including absorption rates, scattering colors, and the appearance of the surface meniscus.
 		/// </summary>
 		public UnderwaterEffect.UnderwaterSettings underWaterSettings = new UnderwaterEffect.UnderwaterSettings();
+		#endregion
 
-		private UnderwaterEffect m_underWaterEffect = null;
-		private bool m_isUnderwaterEffectActive = false;
+		#region Caustics
+		/// <summary>
+		/// Controls whether the <see cref="CausticsEffect"/> is currently enabled.
+		/// </summary>
+		[SerializeField]
+		private bool causticsEnabled = false;
+		public bool IsCausticsEnabled => causticsEnabled;
+
+		/// <summary>
+		/// Settings for the <see cref="CausticsEffect"/>, which renders animated light patterns projected onto the scene geometry underwater.
+		/// </summary>
+		public CausticsEffect.CausticsSettings causticsSettings = new CausticsEffect.CausticsSettings();
+		#endregion
+
+		#region Reflections
+		/// <summary>
+		/// Controls whether real-time planar reflections are generated for this water surface.
+		/// </summary>
+		[SerializeField]
+		private bool reflectionsEnabled = true;
+		public bool IsReflectionsEnabled => reflectionsEnabled;
+
+		/// <summary>
+		/// Settings for the <see cref="FluidFrenzy.SurfaceReflections"/> module (Planar Reflections).
+		/// </summary>
+		public SurfaceReflections.Settings reflectionSettings = new SurfaceReflections.Settings();
+		public SurfaceReflections SurfaceReflections { get; private set; }
+		#endregion
 
 		protected override void Start()
 		{
 			base.Start();
-
-			// Prevent initialization in Edit Mode
 			if (!Application.isPlaying) return;
 
-			if (underWaterEnabled)
+			// Initialize submodule logic
+			SurfaceReflections = new SurfaceReflections(this, reflectionSettings);
+			if (reflectionsEnabled) SurfaceReflections.Enable();
+		}
+
+		protected override void OnEnable()
+		{
+			base.OnEnable();
+			if (Application.isPlaying)
 			{
-				InitializeEffect();
-				if (m_underWaterEffect != null)
-				{
-					m_underWaterEffect.OnEnable();
-					m_isUnderwaterEffectActive = true;
-				}
+				FluidRenderPipeline.Register(this);
 			}
 		}
 
 		protected override void OnDisable()
 		{
 			base.OnDisable();
-			// Clean up effect if it exists (works in both play and edit mode for safety)
-			if (m_underWaterEffect != null)
-			{
-				m_underWaterEffect.OnDisable();
-				m_isUnderwaterEffectActive = false;
-			}
-		}
-
-		private void InitializeEffect()
-		{
-			// Only initialize during Play Mode
-			if (!Application.isPlaying) return;
-			if (m_underWaterEffect != null) return;
-			if (simulation == null) return;
-
-			UnderwaterEffect.Desc desc = new UnderwaterEffect.Desc()
-			{
-				settings = underWaterSettings,
-				surface = this
-			};
-
-			m_underWaterEffect = new UnderwaterEffect(desc);
-		}
-
-		public void SetUnderwaterActive(bool active)
-		{
-			underWaterEnabled = active;
-
-			// Don't run logic in Edit Mode
-			if (!Application.isPlaying) return;
-
-			if (active)
-			{
-				InitializeEffect();
-				if (m_underWaterEffect != null && !m_isUnderwaterEffectActive)
-				{
-					m_underWaterEffect.OnEnable();
-					m_isUnderwaterEffectActive = true;
-				}
-			}
-			else
-			{
-				if (m_isUnderwaterEffectActive)
-				{
-					m_underWaterEffect?.OnDisable();
-					m_isUnderwaterEffectActive = false;
-				}
-			}
-		}
-
-		public void OnUnderwaterChanged()
-		{
-			// Update logic, but only trigger effect lifecycle if playing
 			if (Application.isPlaying)
 			{
-				if (underWaterEnabled) InitializeEffect();
-				SetUnderwaterActive(underWaterEnabled);
+				FluidRenderPipeline.Deregister(this);
+				SurfaceReflections?.Disable();
 			}
 		}
 
-		protected override void PreCull(Camera camera)
+		protected override void OnDestroy()
 		{
-			base.PreCull(camera);
-			if (!Application.isPlaying || camera.cameraType == CameraType.Preview) return;
-
-			if (underWaterEnabled)
-			{
-				m_underWaterEffect?.AddCommandBuffers(camera);
-			}
-		}
-
-		protected override void PostRender(Camera camera)
-		{
-			base.PostRender(camera);
-			if (!Application.isPlaying || camera.cameraType == CameraType.Preview) return;
-
-			m_underWaterEffect?.RemoveCommandBuffers(camera);
-		}
-
-		protected override void OnBeginCameraRendering(ScriptableRenderContext context, Camera camera)
-		{
-			base.OnBeginCameraRendering(context, camera);
-			if (!Application.isPlaying || camera.cameraType == CameraType.Preview) return;
-
-			m_underWaterEffect?.RenderSRP(context, camera);
+			base.OnDestroy();
+			SurfaceReflections?.Cleanup();
 		}
 
 		protected override void Update()
 		{
 			base.Update();
+
+			// Standard Surface logic (Foam params)
 			if (foamLayer)
 			{
 				m_renderMaterial.EnableKeyword("_FOAMMASK_ON");
@@ -157,6 +114,15 @@ namespace FluidFrenzy
 			{
 				m_renderMaterial.DisableKeyword("_FOAMMASK_ON");
 			}
+
+			// Sync submodule settings
+			if (SurfaceReflections != null && reflectionsEnabled)
+			{
+				// Only update if dirty ideally, but for now:
+				SurfaceReflections.UpdateSettings(reflectionSettings);
+			}
 		}
+
+		public new ISurfaceRenderer surfaceRenderer => base.surfaceRenderer;
 	}
 }

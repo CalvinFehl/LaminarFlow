@@ -41,6 +41,11 @@
             "name": "com.unity.burst",
             "expression": "",
             "define": "FLUIDFRENZY_RUNTIME_BURST_SUPPORT"
+        },
+        {
+            "name": "Unity",
+            "expression": "2021.3.29",
+            "define": "FLUIDFRENZY_RUNTIME_HAS_COPY_MATCHING_PROPERTIES"
         }
     ],
     "noEngineReferences": false

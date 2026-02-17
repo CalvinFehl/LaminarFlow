@@ -356,6 +356,22 @@ namespace FluidFrenzy
 			// Reinterpret the result as a float
 			return UnsafeUtility.As<uint, float>(ref absS1Uint);
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static float GetFirstHalfSign(long pixel)
+		{
+			// We look at the first 16 bits (the 'First Half').
+			// In a half-precision float, the 15th bit (0x8000) is the sign bit.
+			// We shift that bit to the 31st position (the sign bit position for a 32-bit float).
+			uint signBit = (uint)(pixel & 0x8000) << 16;
+
+			// We OR it with the bits for 1.0f (0x3f800000).
+			// If signBit was 0, we get 1.0f.
+			// If signBit was 1, we get -1.0f.
+			uint resultRaw = 0x3f800000 | signBit;
+
+			return UnsafeUtility.As<uint, float>(ref resultRaw);
+		}
 	}
 
 	public static class SphericalHarmonicsUtil

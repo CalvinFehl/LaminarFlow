@@ -6,7 +6,9 @@ using UnityEngine.Rendering;
 
 #if FLUIDFRENZY_EDITOR_URP_SUPPORT
 using UnityEngine.Rendering.Universal;
+#if UNITY_6000_0_OR_NEWER
 using UnityEngine.Rendering.RenderGraphModule;
+#endif
 #endif
 
 namespace FluidFrenzy.Editor
@@ -276,7 +278,9 @@ namespace FluidFrenzy.Editor
 				m_Callback = callback;
 			}
 
+#if UNITY_6000_0_OR_NEWER
 			[Obsolete]
+#endif
 			public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
 			{
 				CommandBuffer cmd = CommandBufferPool.Get("SceneViewDepthPicker");
@@ -313,5 +317,5 @@ namespace FluidFrenzy.Editor
 #endif
 		}
 #endif
+		}
 	}
-}

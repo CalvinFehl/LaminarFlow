@@ -234,20 +234,20 @@ namespace FluidFrenzy.Editor
 			float indentOffset = EditorGUI.indentLevel * 15f;
 			float totalWidth = EditorGUIUtility.currentViewWidth - EditorGUIUtility.labelWidth - indentOffset - 20; // 20 for padding
 			Rect labelRect = new Rect(currentRect.x, currentRect.y, EditorGUIUtility.labelWidth - indentOffset, currentRect.height);
-			
+
 			// Ensure minField and maxField sizes are appropriate and calculate sliderRect width
 			float minMaxFieldWidth = fieldWidth / 2;
 			float availableSliderWidth = totalWidth - (minMaxFieldWidth * 2) - 16; // 8 for padding between min, slider, max
-			
+
 			Rect minRect = new Rect(labelRect.xMax + 4, labelRect.y, minMaxFieldWidth, currentRect.height);
 			Rect sliderRect = new Rect(minRect.xMax + 4, labelRect.y, availableSliderWidth, currentRect.height);
 			Rect maxRect = new Rect(sliderRect.xMax + 4, labelRect.y, minMaxFieldWidth, currentRect.height);
-			
+
 			EditorGUI.PrefixLabel(labelRect, label);
-			
+
 			float x = value.x;
 			float y = value.y;
-			
+
 			// Draw the MinMaxSlider in the middle
 			EditorGUI.MinMaxSlider(sliderRect, ref x, ref y, minValue, maxValue);
 			x = Mathf.Min(x, max_minValue);
@@ -336,13 +336,6 @@ namespace FluidFrenzy.Editor
 			toggleRect.width = 13f;
 			toggleRect.height = 13f;
 
-			var menuIcon = Styling.paneOptionsIcon;
-#if UNITY_2019_3_OR_NEWER
-			var menuRect = new Rect(labelRect.xMax + 4f, labelRect.y, menuIcon.width, menuIcon.height);
-#else
-            var menuRect = new Rect(labelRect.xMax + 4f, labelRect.y + 4f, menuIcon.width, menuIcon.height);
-#endif
-
 			// Background rect should be full-width
 			if (fullWidth)
 			{
@@ -372,27 +365,41 @@ namespace FluidFrenzy.Editor
 			return activeProperty.isExpanded;
 		}
 
-		public static bool DrawFoldoutHeader(SerializedProperty activeProperty, GUIContent content)
+		public static bool DrawFoldoutHeader(SerializedProperty activeProperty, GUIContent content, bool useIndent = false)
 		{
 			var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
-			return DrawFoldoutHeader(activeProperty, content, ref backgroundRect);
+			return DrawFoldoutHeader(activeProperty, content, ref backgroundRect, true, useIndent);
 		}
 
-		public static bool DrawFoldoutHeader(ref bool isExpanded, GUIContent content)
+		public static bool DrawFoldoutHeader(ref bool isExpanded, GUIContent content, bool useIndent = false)
 		{
 			var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
-			return DrawFoldoutHeader(ref isExpanded, content, ref backgroundRect);
+			return DrawFoldoutHeader(ref isExpanded, content, ref backgroundRect, true, useIndent);
 		}
 
-		public static bool DrawFoldoutHeader(SerializedProperty activeProperty, GUIContent content, ref Rect rect, bool fullWidth = true)
+		public static bool DrawFoldoutHeader(SerializedProperty activeProperty, GUIContent content, ref Rect rect, bool fullWidth = true, bool useIndent = false)
 		{
 			bool isExpanded = activeProperty.isExpanded;
-			activeProperty.isExpanded = DrawFoldoutHeader(ref isExpanded, content, ref rect, fullWidth);
+			isExpanded = DrawFoldoutHeader(ref isExpanded, content, ref rect, fullWidth, useIndent);
+			activeProperty.isExpanded = isExpanded;
 			return isExpanded;
 		}
-		public static bool DrawFoldoutHeader(ref bool isExpanded, GUIContent content, ref Rect rect, bool fullWidth = true)
+
+		public static bool DrawFoldoutHeader(ref bool isExpanded, GUIContent content, ref Rect rect, bool fullWidth = true, bool useIndent = false)
 		{
+			float indent = useIndent ? EditorGUI.indentLevel * 15f : 0f;
 			var backgroundRect = rect;
+
+			if (useIndent)
+			{
+				backgroundRect.xMin += indent;
+			}
+			else if (fullWidth)
+			{
+				backgroundRect.xMin = 0f;
+				backgroundRect.width += 4f;
+			}
+
 			var labelRect = backgroundRect;
 			labelRect.xMin += 16f;
 			labelRect.xMax -= 20f;
@@ -402,21 +409,7 @@ namespace FluidFrenzy.Editor
 			foldoutRect.width = 13f;
 			foldoutRect.height = 13f;
 
-			var menuIcon = Styling.paneOptionsIcon;
-#if UNITY_2019_3_OR_NEWER
-			var menuRect = new Rect(labelRect.xMax + 4f, labelRect.y, menuIcon.width, menuIcon.height);
-#else
-            var menuRect = new Rect(labelRect.xMax + 4f, labelRect.y + 4f, menuIcon.width, menuIcon.height);
-#endif
-
-			// Background rect should be full-width
-			if (fullWidth)
-			{
-				backgroundRect.xMin = 0f;
-				backgroundRect.width += 4f;
-			}
-
-			// foldout
+			// foldout arrow
 			isExpanded = EditorGUI.Toggle(foldoutRect, GUIContent.none, isExpanded, EditorStyles.foldout);
 
 			// Background
@@ -451,13 +444,6 @@ namespace FluidFrenzy.Editor
 		{
 			var backgroundRect = rect;
 			var labelRect = backgroundRect;
-
-			var menuIcon = Styling.paneOptionsIcon;
-#if UNITY_2019_3_OR_NEWER
-			var menuRect = new Rect(labelRect.xMax + 4f, labelRect.y, menuIcon.width, menuIcon.height);
-#else
-            var menuRect = new Rect(labelRect.xMax + 4f, labelRect.y + 4f, menuIcon.width, menuIcon.height);
-#endif
 
 			// Background rect should be full-width
 			backgroundRect.xMin = 0f;

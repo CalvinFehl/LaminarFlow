@@ -2,19 +2,16 @@
 {
 	SubShader
 	{
-		HLSLINCLUDE
+				HLSLINCLUDE
 
 		#include "Packages/com.frenzybyte.fluidfrenzy/Runtime/Simulation/Shaders/Resources/FluidSimulationCommon.hlsl"
 
 		float4x4 unity_ObjectToWorld;
-		float4x4 unity_MatrixVP;
-		#define UNITY_MATRIX_VP unity_MatrixVP
-		#define UNITY_MATRIX_M unity_ObjectToWorld
 
 		struct v2f
 		{
 			float2 uv : TEXCOORD0;
-			float2 worldPos : TEXCOORD1;
+			float3 localPos : TEXCOORD1;
 			float4 vertex : SV_POSITION;
 		};
 
@@ -27,19 +24,33 @@
 		#define SHAPE_HEX 6
 		#define SHAPE_WEDGE 7
 
-		float3 _Center;
 		float3 _Size; 
-		float2 _TexelSize;
-		float4x4 _Transform; 
-
+		float2 _TexelSize; 
+		float4x4 _Transform; // Sim Local Space to Obstacle Local Space
+		float4 _SimParams;   // x = Width, y = Height
+		float4 _ProjectionParams;
 		v2f vert(uint vid : SV_VertexID)
 		{
 			v2f o;
 			float4 rawVert = GetQuadVertexPosition(vid); 
-			rawVert.xy -= 0.5f; rawVert.z = 0; rawVert.w = 1;
-			float4 worldPos = mul(unity_ObjectToWorld, rawVert);
-			o.vertex = mul(UNITY_MATRIX_VP, worldPos);
-			o.worldPos = worldPos.xz;
+			
+			// Standard Quad is 0..1, center it to -0.5..0.5
+			rawVert.xy -= 0.5f; 
+			rawVert.z = 0; 
+			rawVert.w = 1;
+			
+			float4 localPos = mul(unity_ObjectToWorld, rawVert);
+			float2 clipPos;
+			clipPos.x = localPos.x / (_SimParams.x * 0.5);
+			clipPos.y = localPos.z / (_SimParams.y * 0.5);
+			
+			#if UNITY_UV_STARTS_AT_TOP
+			if (_ProjectionParams.x < 0) clipPos.y *= -1;
+			#endif
+
+			o.vertex = float4(clipPos.x, clipPos.y, 0, 1);
+			o.localPos = localPos.xyz;
+			o.uv = rawVert.xy + 0.5f;
 			return o;
 		}
 
@@ -217,32 +228,52 @@
 			float h = 0;
 			int samples = 0;
 
+			// Ray Direction in Simulation Space is always "Down" (0, -1, 0)
+			// because we are rendering the heightmap top-down relative to the Sim Grid.
+			float3 simRd = float3(0, -1, 0);
+
 			for (int y = -range; y <= range; y++) {
 				for (int x = -range; x <= range; x++) {
-					float2 posOffset = _TexelSize * float2(x, y);
-					float3 worldRo = float3(i.worldPos.x + posOffset.x, offset, i.worldPos.y + posOffset.y);
-					float3 localRo = mul(_Transform, float4(worldRo, 1)).xyz;
-					float3 localRd = mul(_Transform, float4(0,-1,0,0)).xyz;
-					float3 d = normalize(localRd); 
 					
+					// Calculate Sample Point on Sim Grid (Sim Local Space)
+					float2 sampleOffset = float2(x, y) * _TexelSize;
+					float3 simPosOnPlane = i.localPos;
+					simPosOnPlane.x += sampleOffset.x;
+					simPosOnPlane.z += sampleOffset.y; // Z is Y in texture/grid terms
+
+					// Set Ray Origin above the plane
+					float3 simRo = simPosOnPlane;
+					simRo.y += offset;
+
+					// Transform Ray to Obstacle Local Space
+					// This effectively handles the relative position/rotation/scale of the obstacle
+					float3 obsRo = mul(_Transform, float4(simRo, 1)).xyz;
+					float3 obsRd = mul(_Transform, float4(simRd, 0)).xyz;
+
+					// Normalize Direction for standard SDF
+					// The length of obsRd encodes the scale difference (if sim is scaled differently)
+					float scaleFactor = length(obsRd);
+					float3 d = obsRd / scaleFactor; 
+
 					float t = -1.0;
 
-					if (shape == SHAPE_SPHERE) t = sphIntersect(localRo, d, _Size.x);
-					else if (shape == SHAPE_BOX) t = boxIntersect(localRo, d, _Size);
-					else if (shape == SHAPE_CYLINDER) t = cylIntersect(localRo, d, _Size.x, _Size.y);
-					else if (shape == SHAPE_CAPSULE) t = capIntersect(localRo, d, _Size.x, _Size.y);
-					else if (shape == SHAPE_ELLIPSOID) t = ellIntersect(localRo, d, _Size);
-					else if (shape == SHAPE_HEX) t = hexIntersect(localRo, d, _Size.x, _Size.y);
-					else if (shape == SHAPE_CONE) t = coneIntersect(localRo, d, _Size.x, _Size.y, _Size.z);
-					else if (shape == SHAPE_WEDGE) t = wedgeIntersect(localRo, d, _Size);
+					if (shape == SHAPE_SPHERE) t = sphIntersect(obsRo, d, _Size.x);
+					else if (shape == SHAPE_BOX) t = boxIntersect(obsRo, d, _Size);
+					else if (shape == SHAPE_CYLINDER) t = cylIntersect(obsRo, d, _Size.x, _Size.y);
+					else if (shape == SHAPE_CAPSULE) t = capIntersect(obsRo, d, _Size.x, _Size.y);
+					else if (shape == SHAPE_ELLIPSOID) t = ellIntersect(obsRo, d, _Size);
+					else if (shape == SHAPE_HEX) t = hexIntersect(obsRo, d, _Size.x, _Size.y);
+					else if (shape == SHAPE_CONE) t = coneIntersect(obsRo, d, _Size.x, _Size.y, _Size.z);
+					else if (shape == SHAPE_WEDGE) t = wedgeIntersect(obsRo, d, _Size);
 					
-					float worldHeight = 0;
+					float simHeight = 0;
 					if (t > 0.0) {
-						float3 worldDirUnnorm = mul(_Transform, float4(0,-1,0,0)).xyz;
-						float worldDist = t / length(worldDirUnnorm); 
-						worldHeight = offset - worldDist;
+						// 't' is distance in Obstacle Space.
+						// Convert back to Sim Space Distance: t / scaleFactor
+						float dist = t / scaleFactor;
+						simHeight = offset - dist;
 					}
-					h += max(0, worldHeight);
+					h += max(0, simHeight);
 					samples++;
 				}
 			}

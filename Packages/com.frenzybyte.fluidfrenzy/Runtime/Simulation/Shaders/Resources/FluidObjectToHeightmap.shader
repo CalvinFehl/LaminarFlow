@@ -29,7 +29,9 @@
 				float4 worldPos : TEXCOORD0;
 			};
 
+			
 			float3 _SimulationPositionWS;
+			float _HeightNormalization;
 
 			v2f_std vert_standard (appdata_std v)
 			{
@@ -41,7 +43,7 @@
 
 			float4 frag_standard (v2f_std i) : SV_Target
 			{
-				return i.worldPos.y - _SimulationPositionWS.y;
+				return (i.worldPos.y - _SimulationPositionWS.y) * _HeightNormalization;
 			}
 			ENDCG
 		}
@@ -74,6 +76,7 @@
 			};
             
 			float3 _SimulationPositionWS;
+			float _HeightNormalization;
 
 			v2g vert_geom (float4 vertex : POSITION)
 			{
@@ -197,7 +200,7 @@
 
 				float trueHeight = RayPlaneIntersection(rayOrigin, rayDir, i.worldPos0, planeNormal);
 
-				return trueHeight - _SimulationPositionWS.y;
+				return (trueHeight - _SimulationPositionWS.y) * _HeightNormalization;
 			}
 			ENDCG
 		}
@@ -236,6 +239,7 @@
 			};
 
 			float3 _SimulationPositionWS;
+			float _HeightNormalization;
 
 			v2f_std vert_standard (appdata_std v)
 			{
@@ -247,7 +251,7 @@
 
 			float4 frag_standard (v2f_std i) : SV_Target
 			{
-				return i.worldPos.y - _SimulationPositionWS.y;
+				return (i.worldPos.y - _SimulationPositionWS.y) * _HeightNormalization;
 			}
 			ENDCG
 		}

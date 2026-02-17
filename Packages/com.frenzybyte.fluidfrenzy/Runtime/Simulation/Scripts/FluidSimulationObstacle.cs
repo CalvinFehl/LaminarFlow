@@ -227,7 +227,7 @@ namespace FluidFrenzy
 									   SystemInfo.supportsGeometryShaders;
 
 				int passIndex = useConservative ? 1 : 0;
-				cmd.DrawRenderer(obstacleRenderer, obstacleMaterial, passIndex);
+				cmd.DrawRenderer(obstacleRenderer, obstacleMaterial, 0, passIndex);
 			}
 			else
 			{

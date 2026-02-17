@@ -105,6 +105,8 @@ Shader "FluidFrenzy/Water"
         [HideInInspector]_MaterialTypeMask("_MaterialTypeMask", Float) = 16
         [HideInInspector][ToggleUI]_TransmissionEnable("Boolean", Float) = 1
 		[HideInInspector] _RenderingLayerMask("Rendering Layer Mask", Float) = 0
+
+		[HideInInspector] _EmissionColor("Dummy Emission", Color) = (0,0,0)
     }
     SubShader
     {
