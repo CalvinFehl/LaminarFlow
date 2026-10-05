@@ -1,9 +1,0 @@
-fileFormatVersion: 2
-guid: ef63868751d5a994e88c16d3066524ff
-AssetOrigin:
-  serializedVersion: 1
-  productId: 273366
-  packageName: Fluid Frenzy
-  packageVersion: 1.4.0
-  assetPath: Packages/com.frenzybyte.fluidfrenzy/Runtime/Rendering/ExternalCompatibility/FluidExternalHelpers.cs
-  uploadId: 863696
