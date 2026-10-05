@@ -10,6 +10,7 @@ public class SimpleRotater : MonoBehaviour, IReferenceRigidbody, IHandleInput, I
 
 
     [Header("Settings")]
+    [SerializeField] private bool usesPhysicsRotation = true;
     [SerializeField] private float pitchSpeed = 0f;
     [SerializeField] private float yawSpeed = 0f;
     [SerializeField] private float rollSpeed = 0f;
@@ -26,7 +27,13 @@ public class SimpleRotater : MonoBehaviour, IReferenceRigidbody, IHandleInput, I
     }
     public void Simulate(float deltaTime)
     {
-        PhysicsRigidbody.transform.rotation = Quaternion.Euler(RotThrottle);
-        // PhysicsRigidbody.AddRelativeTorque(RotThrottle * deltaTime, ForceMode.Impulse);
+        if (usesPhysicsRotation)
+        {
+            PhysicsRigidbody.AddRelativeTorque(RotThrottle * deltaTime, ForceMode.Impulse);
+        }
+        else
+        {
+            PhysicsRigidbody.transform.rotation = Quaternion.Euler(RotThrottle);
+        }
     }
 }
