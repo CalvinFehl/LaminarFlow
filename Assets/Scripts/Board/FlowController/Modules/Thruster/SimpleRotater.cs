@@ -26,6 +26,7 @@ public class SimpleRotater : MonoBehaviour, IReferenceRigidbody, IHandleInput, I
     }
     public void Simulate(float deltaTime)
     {
-        PhysicsRigidbody.AddRelativeTorque(RotThrottle * deltaTime, ForceMode.Impulse);
+        PhysicsRigidbody.transform.rotation = Quaternion.Euler(RotThrottle);
+        // PhysicsRigidbody.AddRelativeTorque(RotThrottle * deltaTime, ForceMode.Impulse);
     }
 }
