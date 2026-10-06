@@ -18,6 +18,8 @@ public class SimpleThruster : MonoBehaviour, IReferenceRigidbody, IHandleInput, 
     [SerializeField] private bool usesLeftTrigger = true;
     [SerializeField] private float thrusterPower = 240f;
     [SerializeField] private float maxThrust = 240f;
+    [SerializeField] private bool isMaxSpeedClamped;
+    [SerializeField] private float maxSpeed = 240f;
     [SerializeField] private float airborneTresholdFactor = 3f;
     [SerializeField] private float airborneMultiplyer = 2f;
 
@@ -44,16 +46,28 @@ public class SimpleThruster : MonoBehaviour, IReferenceRigidbody, IHandleInput, 
 
     // ISimulateable Method
     public void Simulate(float deltaTime)
-    {
-        if (Thrust != 0f)
-        {
-            PhysicsRigidbody.AddForce(Thrust * transform.up * deltaTime, ForceMode.Impulse);            
-        }
-
+    {        
         if (soundSystem != null)
         {
             soundSystem.HandleSound(Thrust, deltaTime);
         }
+
+        if (Thrust != 0f)
+        {
+            if (isMaxSpeedClamped)
+            {
+                float forwardSpeed = Vector3.Dot(PhysicsRigidbody.linearVelocity, transform.up);
+                //Debug.Log($"Forward Speed: {forwardSpeed}");
+
+                if (forwardSpeed > maxSpeed)
+                {
+                    return;
+                }
+            }
+
+            PhysicsRigidbody.AddForce(Thrust * transform.up * deltaTime, ForceMode.Impulse);            
+        }
+
     }
 
     // IReconsileFloat Methods

@@ -18,6 +18,8 @@ public class PDThruster : MonoBehaviour, IReferenceRigidbody, IHandleInput, IHan
     [SerializeField] private bool usesLeftTrigger = true;
     [SerializeField] private float thrusterPower = 600f;
     [SerializeField] private float maxThrust = 900f;
+    [SerializeField] private bool isMaxSpeedClamped;
+    [SerializeField] private float maxSpeed = 240f;
     [SerializeField] private float airborneTresholdFactor = 3f;
     [SerializeField] private float airborneMultiplyer = 2f;
 
@@ -70,14 +72,26 @@ public class PDThruster : MonoBehaviour, IReferenceRigidbody, IHandleInput, IHan
             PDControllerIsDirty = false;
         }
 
-        if (Thrust != 0f)
-        {
-            PhysicsRigidbody.AddForce(Thrust * transform.up * deltaTime, ForceMode.Impulse);
-        }
-
         if (soundSystem != null)
         {
             soundSystem.HandleSound(Thrust, deltaTime);
+        }
+
+        if (Thrust != 0f)
+        {
+            if (isMaxSpeedClamped)
+            {
+                float forwardSpeed = Vector3.Dot(PhysicsRigidbody.linearVelocity, transform.up);
+
+                Debug.Log($"Hover Speed: {forwardSpeed}");
+
+                if (forwardSpeed > maxSpeed)
+                {
+                    return;
+                }
+            }
+
+            PhysicsRigidbody.AddForce(Thrust * transform.up * deltaTime, ForceMode.Impulse);
         }
     }
 
